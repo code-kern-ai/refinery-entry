@@ -191,34 +191,28 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
       >
         {!hideGlobalMessages ? <Messages messages={flow.ui.messages} /> : null}
         {nodes.map((node, k) => {
-
-
           const id = getNodeId(node) as keyof Values
-          return { isDemoUser } ? (
-            <Node
-              key={`${id}-${k}`}
-              disabled={isLoading}
-              node={node}
-              value={values[id]}
-              dispatchSubmit={this.handleSubmit}
-              setValue={(value) =>
-                new Promise((resolve) => {
-                  this.setState(
-                    (state) => ({
-                      ...state,
-                      values: {
-                        ...state.values,
-                        [getNodeId(node)]: value,
-                      },
-                    }),
-                    resolve,
-                  )
-                })
-              }
-            />
-          ) : (
-            <></>
-          )
+          return <Node
+            key={`${id}-${k}`}
+            disabled={isLoading}
+            node={node}
+            value={values[id]}
+            dispatchSubmit={this.handleSubmit}
+            setValue={(value) =>
+              new Promise((resolve) => {
+                this.setState(
+                  (state) => ({
+                    ...state,
+                    values: {
+                      ...state.values,
+                      [getNodeId(node)]: value,
+                    },
+                  }),
+                  resolve,
+                )
+              })
+            }
+          />
         })}
       </form>
     )

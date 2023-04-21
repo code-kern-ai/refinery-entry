@@ -25,7 +25,7 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
       onChange={(e) => {
         setValue(e.target.value)
       }}
-      className="text-input"
+      className={"text-input" + (props.visible ? "" : " hidden")}
       type={attributes.type}
       name={attributes.name}
       placeholder={getNodeLabel(node)}

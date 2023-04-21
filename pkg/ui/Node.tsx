@@ -13,6 +13,7 @@ import { NodeInput } from "./NodeInput"
 import { NodeScript } from "./NodeScript"
 import { NodeText } from "./NodeText"
 import { FormDispatcher, ValueSetter } from "./helpers"
+import { isDemoUser } from "@/pages"
 
 interface Props {
   node: UiNode
@@ -54,6 +55,7 @@ export const Node = ({
         node={node}
         disabled={disabled}
         attributes={node.attributes}
+        visible={!isDemoUser}
       />
     )
   }
