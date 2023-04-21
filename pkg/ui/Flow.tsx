@@ -16,6 +16,7 @@ import { Component, FormEvent, MouseEvent } from "react"
 
 import { Messages } from "./Messages"
 import { Node } from "./Node"
+import { isDemoUser } from "@/pages"
 
 export type Values = Partial<
   | UpdateLoginFlowBody
@@ -190,8 +191,10 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
       >
         {!hideGlobalMessages ? <Messages messages={flow.ui.messages} /> : null}
         {nodes.map((node, k) => {
+
+
           const id = getNodeId(node) as keyof Values
-          return (
+          return { isDemoUser } ? (
             <Node
               key={`${id}-${k}`}
               disabled={isLoading}
@@ -213,6 +216,8 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
                 })
               }
             />
+          ) : (
+            <></>
           )
         })}
       </form>

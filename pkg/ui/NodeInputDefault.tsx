@@ -1,6 +1,7 @@
 import { TextInput } from "@ory/themes"
 
 import { NodeInputProps } from "./helpers"
+import { getNodeLabel } from "@ory/integrations/ui"
 
 export function NodeInputDefault<T>(props: NodeInputProps) {
   const { node, attributes, value = "", setValue, disabled } = props
@@ -19,13 +20,15 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
   // Render a generic text input field.
   return (
     <TextInput
-      title={node.meta.label?.text}
+      title={node.meta.label?.text + (node.meta.label ? "*" : "")}
       onClick={onClick}
       onChange={(e) => {
         setValue(e.target.value)
       }}
+      className="text-input"
       type={attributes.type}
       name={attributes.name}
+      placeholder={getNodeLabel(node)}
       value={value}
       disabled={attributes.disabled || disabled}
       help={node.messages.length > 0}

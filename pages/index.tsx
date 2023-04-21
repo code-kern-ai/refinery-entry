@@ -8,6 +8,9 @@ import { useEffect, useState } from "react"
 import { DocsButton, MarginCard, LogoutLink } from "../pkg"
 import ory from "../pkg/sdk"
 
+export const isFreeTrial = process.env.IS_OS === 'true' || process.env.IS_OS === '1';
+export const isDemoUser = process.env.IS_DEMO === 'true' || process.env.IS_DEMO === '1';
+
 const Home: NextPage = () => {
   const [session, setSession] = useState<string>(
     "No valid Ory Session was found.\nPlease sign in to receive one.",

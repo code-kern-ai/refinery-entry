@@ -9,6 +9,7 @@ import { useEffect, useState } from "react"
 
 import { Flow, ActionCard, CenterLink, MarginCard } from "../pkg"
 import ory from "../pkg/sdk"
+import { KernLogo } from "@/pkg/ui/Icons"
 
 const Verification: NextPage = () => {
   const [flow, setFlow] = useState<VerificationFlow>()
@@ -50,6 +51,9 @@ const Verification: NextPage = () => {
         returnTo: returnTo ? String(returnTo) : undefined,
       })
       .then(({ data }) => {
+        if (data.ui.nodes[1].meta.label) {
+          data.ui.nodes[1].meta.label.text = "Email address"
+        }
         setFlow(data)
       })
       .catch((err: AxiosError) => {
@@ -106,18 +110,21 @@ const Verification: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Verify your account - Ory NextJS Integration Example</title>
+        <title>Verification</title>
         <meta name="description" content="NextJS + React + Vercel + Ory" />
       </Head>
-      <MarginCard>
-        <CardTitle>Verify your account</CardTitle>
-        <Flow onSubmit={onSubmit} flow={flow} />
-      </MarginCard>
-      <ActionCard>
-        <Link href="/" passHref>
-          <CenterLink>Go back</CenterLink>
-        </Link>
-      </ActionCard>
+      <div className="app-container">
+        <KernLogo />
+        <div id="verification">
+          <h2 className="title">Verify your account</h2>
+          <Flow onSubmit={onSubmit} flow={flow} />
+          <div className="link-container">
+            <a className="link" data-testid="forgot-password" href="/login">Go back to login</a>
+          </div>
+        </div>
+      </div>
+      <div className="img-container">
+      </div>
     </>
   )
 }

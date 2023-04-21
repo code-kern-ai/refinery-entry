@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 
 import { ActionCard, CenterLink, MarginCard } from "../pkg"
 import ory from "../pkg/sdk"
+import { KernLogo } from "@/pkg/ui/Icons"
 
 const Login: NextPage = () => {
   const [error, setError] = useState<FlowError | string>()
@@ -48,17 +49,19 @@ const Login: NextPage = () => {
 
   return (
     <>
-      <MarginCard wide>
-        <CardTitle>An error occurred</CardTitle>
-        <CodeBox code={JSON.stringify(error, null, 2)} />
-      </MarginCard>
-      <ActionCard wide>
-        <Link href="/" passHref>
-          <CenterLink>Go back</CenterLink>
-        </Link>
-      </ActionCard>
+      <div className="app-container">
+        <KernLogo />
+        <div id="error">
+          <h2 className="title">An error occurred</h2>
+          <div className="link-container">
+            <a className="link" data-testid="back-button" href="/login">Go back to login</a>
+          </div>
+        </div>
+      </div>
+      <div className="img-container">
+      </div>
     </>
   )
 }
 
-export default Login
+export default Error

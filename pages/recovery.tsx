@@ -3,13 +3,13 @@ import { CardTitle } from "@ory/themes"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
-import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 import { Flow, ActionCard, CenterLink, MarginCard } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
+import { KernLogo } from "@/pkg/ui/Icons"
 
 const Recovery: NextPage = () => {
   const [flow, setFlow] = useState<RecoveryFlow>()
@@ -39,6 +39,12 @@ const Recovery: NextPage = () => {
     ory
       .createBrowserRecoveryFlow()
       .then(({ data }) => {
+        if (data.ui.nodes[1].meta.label) {
+          data.ui.nodes[1].meta.label.text = "Email address"
+        }
+        if (data.ui.nodes[2].meta.label) {
+          data.ui.nodes[2].meta.label.text = "Send reset code to mail"
+        }
         setFlow(data)
       })
       .catch(handleFlowError(router, "recovery", setFlow))
@@ -85,18 +91,21 @@ const Recovery: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Recover your account - Ory NextJS Integration Example</title>
+        <title>Recovery</title>
         <meta name="description" content="NextJS + React + Vercel + Ory" />
       </Head>
-      {/* <MarginCard> */}
-      <CardTitle>Recover your account</CardTitle>
-      <Flow onSubmit={onSubmit} flow={flow} />
-      {/* </MarginCard> */}
-      <ActionCard>
-        <Link href="/" passHref>
-          <CenterLink>Go back</CenterLink>
-        </Link>
-      </ActionCard>
+      <div className="app-container">
+        <KernLogo />
+        <div id="verification">
+          <h2 className="title">Recover your account</h2>
+          <Flow onSubmit={onSubmit} flow={flow} />
+          <div className="link-container">
+            <a className="link" data-testid="forgot-password" href="/login">Go back to login</a>
+          </div>
+        </div>
+      </div>
+      <div className="img-container">
+      </div>
     </>
   )
 }

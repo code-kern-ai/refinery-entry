@@ -11,6 +11,7 @@ import { ActionCard, CenterLink, LogoutLink, Flow, MarginCard } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
+import { isDemoUser, isFreeTrial } from "."
 
 const Login: NextPage = () => {
   const [flow, setFlow] = useState<LoginFlow>()
@@ -60,8 +61,6 @@ const Login: NextPage = () => {
         if (data.ui.nodes[1].meta.label) {
           data.ui.nodes[1].meta.label.text = "Email address"
         }
-        const signIn = document.getElementsByClassName("button")[0];
-        if (signIn) signIn.classList.add("button-sign-in");
         setFlow(data)
       })
       .catch(handleFlowError(router, "login", setFlow))
@@ -109,12 +108,25 @@ const Login: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="login">
-          <h2 className="title">Sign in to your account</h2>
-          <p className="text-paragraph">You don't have an account yet?
-            <a className="link" data-testid="cta-link" href="/registration">&nbsp; Sign up here (local)</a>
-          </p>
+          <h2 className="title">{isDemoUser ? 'Proceed with your selected role' : 'Sign in to your account'}</h2>
+          {!isDemoUser ? (
+            <>{isFreeTrial ? (
+              <p className="text-paragraph">Or
+                <a className="link" data-testid="cta-link" href="/registration">&nbsp;start your 14-day free trial</a>
+                - no credit card required!
+              </p>
+            ) : (<>
+              <p className="text-paragraph">You don't have an account yet?
+                <a className="link" data-testid="cta-link" href="/registration">&nbsp;Sign up here (local)</a>
+              </p>
+            </>)}</>
+          ) : (<></>)}
           <div className="ui-container">
-            <Flow onSubmit={onSubmit} flow={flow} />
+            {!isDemoUser ? (<Flow onSubmit={onSubmit} flow={flow} />) : (<></>)}
+
+          </div>
+          <div className="link-container">
+            {!isDemoUser ? (<a className="link" data-testid="forgot-password" href="recovery">Forgot your password?</a>) : (<></>)}
           </div>
         </div>
       </div>

@@ -12,6 +12,8 @@ import { handleFlowError } from "../pkg/errors"
 // Import the SDK
 import ory from "../pkg/sdk"
 import Link from "next/link"
+import { KernLogo } from "@/pkg/ui/Icons"
+import { isFreeTrial } from "."
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -49,6 +51,9 @@ const Registration: NextPage = () => {
         returnTo: returnTo ? String(returnTo) : undefined,
       })
       .then(({ data }) => {
+        if (data.ui.nodes[1].meta.label) {
+          data.ui.nodes[1].meta.label.text = "Email address"
+        }
         setFlow(data)
       })
       .catch(handleFlowError(router, "registration", setFlow))
@@ -106,15 +111,18 @@ const Registration: NextPage = () => {
         <title>Registration</title>
         <meta name="description" content="NextJS + React + Vercel + Ory" />
       </Head>
-      <MarginCard>
-        <CardTitle>Create account</CardTitle>
-        <Flow onSubmit={onSubmit} flow={flow} />
-      </MarginCard>
-      <ActionCard>
-        <Link data-testid="cta-link" href="/login">
-          Sign in
-        </Link>
-      </ActionCard>
+      <div className="app-container">
+        <KernLogo />
+        <div id="signup">
+          <h2 className="title">{isFreeTrial ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
+          <Flow onSubmit={onSubmit} flow={flow} />
+          <div className="link-container">
+            <a className="link" data-testid="forgot-password" href="/login">Go back to login</a>
+          </div>
+        </div>
+      </div>
+      <div className="img-container">
+      </div>
     </>
   )
 }

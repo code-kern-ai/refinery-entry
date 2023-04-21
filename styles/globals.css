@@ -59,7 +59,7 @@ body {
     margin-top: 32px !important;
 }
 
-button.button-sign-in {
+#submit {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -76,7 +76,7 @@ button.button-sign-in {
     cursor: pointer;
 }
 
-button.button-sign-in:hover {
+#submit:hover {
     background-color: #2f7241 !important;
 }
 
@@ -94,7 +94,7 @@ button.button-sign-in:focus {
     color: rgb(55 65 81);
 }
 
-.text-input {
+.text-input input {
     appearance: none;
     display: block;
     width: 100%;
@@ -106,12 +106,12 @@ button.button-sign-in:focus {
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-.text-input::placeholder {
+.text-input input::placeholder {
     color: rgb(156 163 175);
 }
 
-.text-input:focus,
-.text-input:hover,
+.text-input input:focus,
+.text-input input:hover,
 .select:focus,
 .select:hover {
     outline-color: #5AB370;
