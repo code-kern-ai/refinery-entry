@@ -99,16 +99,16 @@ const Settings: NextPage = () => {
 
             // continue_with is a list of actions that the user might need to take before the settings update is complete.
             // It could, for example, contain a link to the verification form.
-            if (data.continue_with) {
-              let item: any;
-              for (item of data.continue_with) {
-                switch (item.action) {
-                  case "show_verification_ui":
-                    router.push("/verification?flow=" + item.flow.id)
-                    return
-                }
-              }
-            }
+            // if (data.continue_with) {
+            //   let item: any;
+            //   for (item of data.continue_with) {
+            //     switch (item.action) {
+            //       case "show_verification_ui":
+            //         router.push("/verification?flow=" + item.flow.id)
+            //         return
+            //     }
+            //   }
+            // }
           })
           .catch(handleFlowError(router, "settings", setInitialFlow))
           .catch(async (err: AxiosError) => {
