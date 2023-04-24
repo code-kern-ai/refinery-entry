@@ -13,9 +13,11 @@ import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 import { isDemoUser, isFreeTrial } from "."
 import { DemoFlow } from "@/pkg/ui/DemoFlow"
+import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 
 const Login: NextPage = () => {
-  const [flow, setFlow] = useState<LoginFlow>()
+  const [initialFlow, setInitialFlow] = useState<LoginFlow>()
+  const [changedFlow, setChangedFlow] = useState<LoginFlow>()
   const [selectedRole, setSelectedRole] = useState<string | undefined>('engineer');
 
   // Get ?flow=... from the URL
@@ -37,7 +39,7 @@ const Login: NextPage = () => {
 
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
-    if (!router.isReady || flow) {
+    if (!router.isReady || initialFlow) {
       return
     }
 
@@ -46,9 +48,9 @@ const Login: NextPage = () => {
       ory
         .getLoginFlow({ id: String(flowId) })
         .then(({ data }) => {
-          setFlow(data)
+          setInitialFlow(data)
         })
-        .catch(handleGetFlowError(router, "login", setFlow))
+        .catch(handleGetFlowError(router, "login", setInitialFlow))
       return
     }
 
@@ -60,64 +62,61 @@ const Login: NextPage = () => {
         returnTo: returnTo ? String(returnTo) : undefined,
       })
       .then(({ data }) => {
-        if (data.ui.nodes[1].meta.label) {
-          data.ui.nodes[1].meta.label.text = "Email address"
-        }
-        if (data.ui.nodes[3].meta.label && isDemoUser) {
-          data.ui.nodes[3].meta.label.text = "Proceed"
-        }
-        setFlow(data)
+        setInitialFlow(data)
       })
-      .catch(handleFlowError(router, "login", setFlow))
-  }, [flowId, router, router.isReady, aal, refresh, returnTo, flow])
+      .catch(handleFlowError(router, "login", setInitialFlow))
+  }, [flowId, router, router.isReady, aal, refresh, returnTo, initialFlow])
+
+  useEffect(() => {
+    if (!initialFlow) return;
+    const data = { ...initialFlow };
+    if (data.ui.nodes[1].meta.label) {
+      data.ui.nodes[1].meta.label.text = "Email address"
+      if (isDemoUser) {
+        data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
+      }
+    }
+    if (data.ui.nodes[2].meta.label && isDemoUser) {
+      data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
+    }
+    if (data.ui.nodes[3].meta.label && isDemoUser) {
+      data.ui.nodes[3].meta.label.text = "Proceed"
+    }
+    setChangedFlow(data);
+  }, [initialFlow, selectedRole])
 
   const onSubmit = (values: UpdateLoginFlowBody) =>
     router
       // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
       // his data when she/he reloads the page.
-      .push(`/login?flow=${flow?.id}`, undefined, { shallow: true })
+      .push(`/login?flow=${initialFlow?.id}`, undefined, { shallow: true })
       .then(() =>
         ory
           .updateLoginFlow({
-            flow: String(flow?.id),
+            flow: String(initialFlow?.id),
             updateLoginFlowBody: values,
           })
           // We logged in successfully! Let's bring the user home.
           .then(() => {
-            if (flow?.return_to) {
-              window.location.href = flow?.return_to
+            if (initialFlow?.return_to) {
+              window.location.href = initialFlow?.return_to
               return
             }
             router.push("/")
           })
           .then(() => { })
-          .catch(handleFlowError(router, "login", setFlow))
+          .catch(handleFlowError(router, "login", setInitialFlow))
           .catch((err: AxiosError) => {
             // If the previous handler did not catch the error it's most likely a form validation error
             if (err.response?.status === 400) {
               // Yup, it is!
-              setFlow(err.response?.data)
+              setInitialFlow(err.response?.data)
               return
             }
 
             return Promise.reject(err)
           }),
       )
-
-  function changeIdentifierAndPassword() {
-    const identifier = document.getElementsByName("identifier")[0] as HTMLInputElement;
-    const password = document.getElementsByName("password")[0] as HTMLInputElement;
-    if (selectedRole === 'engineer') {
-      identifier.value = 'demo.engineer@kern.ai';
-      password.value = 'c34540903b9f';
-    } else if (selectedRole === 'expert') {
-      identifier.value = 'demo.expert@kern.ai';
-      password.value = 'c34540903b9f';
-    } else if (selectedRole === 'annotator') {
-      identifier.value = 'demo.annotator@kern.ai';
-      password.value = 'c34540903b9f';
-    }
-  }
 
   return (
     <>
@@ -142,12 +141,12 @@ const Login: NextPage = () => {
             </>)}</>
           ) : (<></>)}
           <div className="ui-container">
-            {!isDemoUser ? (<Flow onSubmit={onSubmit} flow={flow} />) : (<>
+            {!isDemoUser ? (<Flow onSubmit={onSubmit} flow={changedFlow} />) : (<>
               <fieldset>
                 <span className="typography-h3">
                   Select role
                   <span className="required-indicator">*</span>
-                  <select className="typography-h3 select" id="roles" value={selectedRole} onChange={(e: any) => { setSelectedRole(e.target.value); changeIdentifierAndPassword() }}>
+                  <select className="typography-h3 select" id="roles" value={selectedRole} onChange={(e: any) => { setSelectedRole(e.target.value); }}>
                     <option value="engineer">Engineer</option>
                     <option value="expert">Expert</option>
                     <option value="annotator">Annotator</option>
@@ -160,7 +159,7 @@ const Login: NextPage = () => {
               <p className="text-description" id="sub-description">
                 {selectedRole === 'engineer' ? 'They have access to all features of the application, including the Python SDK.' : selectedRole === 'expert' ? 'They have access to the labeling view only.' : 'They have access to a task-minimized labeling view only. Engineers can revoke their access to the labeling view.'}
               </p>
-              <DemoFlow onSubmit={onSubmit} flow={flow} />
+              <DemoFlow onSubmit={onSubmit} flow={changedFlow} />
             </>)}
           </div>
           <div className="link-container">

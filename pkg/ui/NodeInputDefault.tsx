@@ -44,6 +44,7 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
           ))}
         </>
       }
+      required={attributes.required}
     />
   )
 }
