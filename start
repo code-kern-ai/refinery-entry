@@ -1,0 +1,15 @@
+#!/bin/bash
+trap "echo -ne '\nstopping container...' && docker stop refinery-entry > /dev/null 2>&1 && echo -ne '\t\t [done]\n'" EXIT
+
+docker stop refinery-entry
+
+docker build -t refinery-entry-dev -f dev.Dockerfile .
+
+docker run --rm -d \
+--name refinery-entry \
+-p 7080:3000 \
+--mount type=bind,source="$(pwd)"/,target=/app \
+--network dev-setup_default \
+refinery-entry-dev
+
+docker logs -f refinery-entry

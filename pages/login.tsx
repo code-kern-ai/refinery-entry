@@ -9,11 +9,12 @@ import { useEffect, useState } from "react"
 
 import { ActionCard, CenterLink, LogoutLink, Flow, MarginCard } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
-import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 import { isDemoUser, isFreeTrial } from "."
 import { DemoFlow } from "@/pkg/ui/DemoFlow"
 import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
+import ory from "@/pkg/sdk"
+import cors from 'cors';
 
 const Login: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<LoginFlow>()
@@ -53,7 +54,6 @@ const Login: NextPage = () => {
         .catch(handleGetFlowError(router, "login", setInitialFlow))
       return
     }
-
     // Otherwise we initialize it
     ory
       .createBrowserLoginFlow({
@@ -73,11 +73,11 @@ const Login: NextPage = () => {
     if (data.ui.nodes[1].meta.label) {
       data.ui.nodes[1].meta.label.text = "Email address"
       if (isDemoUser) {
-        data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
+        // data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
       }
     }
     if (data.ui.nodes[2].meta.label && isDemoUser) {
-      data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
+      // data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
     }
     if (data.ui.nodes[3].meta.label && isDemoUser) {
       data.ui.nodes[3].meta.label.text = "Proceed"
