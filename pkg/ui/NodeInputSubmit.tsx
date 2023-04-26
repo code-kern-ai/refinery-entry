@@ -2,7 +2,8 @@ import { getNodeLabel } from "@ory/integrations/ui"
 import { Button } from "@ory/themes"
 
 import { NodeInputProps } from "./helpers"
-import { isFreeTrial } from "@/pages"
+import { isFreeTrial } from "@/util/constants"
+
 
 export function NodeInputSubmit<T>({
   node,

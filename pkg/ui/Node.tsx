@@ -13,7 +13,8 @@ import { NodeInput } from "./NodeInput"
 import { NodeScript } from "./NodeScript"
 import { NodeText } from "./NodeText"
 import { FormDispatcher, ValueSetter } from "./helpers"
-import { isDemoUser } from "@/pages"
+import { isDemoUser } from "@/util/constants"
+
 
 interface Props {
   node: UiNode

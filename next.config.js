@@ -6,6 +6,9 @@ const nextConfig = {
     newNextLinkBehavior: true,
     scrollRestoration: true,
   },
+  env: {
+    ORY_SDK_URL: "http://localhost:4455"
+  }
 
 }
 

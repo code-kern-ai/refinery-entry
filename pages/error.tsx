@@ -36,7 +36,7 @@ const Login: NextPage = () => {
           // The error id could not be fetched due to e.g. a CSRF issue. Let's just redirect home!
           case 410:
             // The error id expired. Let's just redirect home!
-            return router.push("/")
+            return router.push("/welcome")
         }
 
         return Promise.reject(err)
@@ -54,7 +54,7 @@ const Login: NextPage = () => {
         <div id="error">
           <h2 className="title">An error occurred</h2>
           <div className="link-container">
-            <a className="link" data-testid="back-button" href="/login">Go back to login</a>
+            <Link className="link" data-testid="back-button" href="/login">Go back to login</Link>
           </div>
         </div>
       </div>

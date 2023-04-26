@@ -10,9 +10,10 @@ import { Flow, ActionCard, CenterLink, MarginCard } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
+import Link from "next/link"
 
 const Recovery: NextPage = () => {
-  const [initialFlow, setInitialFlow] = useState<RecoveryFlow>()
+  const [initialFlow, setInitialFlow]: any = useState<RecoveryFlow>()
   const [changedFlow, setChangedFlow] = useState<RecoveryFlow>()
 
   // Get ?flow=... from the URL
@@ -57,9 +58,7 @@ const Recovery: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return
-    if (initialFlow.ui.nodes[1].meta.label) {
-      initialFlow.ui.nodes[1].meta.label.text = "Email address"
-    }
+    initialFlow.ui.nodes[1].meta.label = { text: "Email address", id: 0, type: "info" }
     if (initialFlow.ui.nodes[2].meta.label) {
       initialFlow.ui.nodes[2].meta.label.text = "Send reset code to mail"
     }
@@ -106,7 +105,7 @@ const Recovery: NextPage = () => {
           <h2 className="title">Recover your account</h2>
           <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/login">Go back to login</a>
+            <Link className="link" data-testid="forgot-password" href="/login">Go back to login</Link>
           </div>
         </div>
       </div>

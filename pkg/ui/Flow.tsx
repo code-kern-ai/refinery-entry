@@ -16,7 +16,6 @@ import { Component, FormEvent, MouseEvent } from "react"
 
 import { Messages } from "./Messages"
 import { Node } from "./Node"
-import { isDemoUser } from "@/pages"
 import { firstName, lastName } from "@/util/constants"
 
 export type Values = Partial<
@@ -183,12 +182,6 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
       // and the filter did not match any elements!
       return null
     }
-
-    if (nodes[0].group === "default" && nodes[1].meta.label?.text === "Email address" && this.props.only === "profile") {
-      nodes.splice(2, 0, firstName);
-      nodes.splice(3, 0, lastName);
-    }
-
     return (
       <form
         action={flow.ui.action}

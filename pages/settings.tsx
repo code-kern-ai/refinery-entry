@@ -11,7 +11,6 @@ import { ActionCard, CenterLink, Flow, Messages, Methods } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { firstName, lastName } from "@/util/constants"
 
 interface Props {
   flow?: SettingsFlow
@@ -188,7 +187,7 @@ const Settings: NextPage = () => {
           </div>
 
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/login">Back</a>
+            <Link className="link" data-testid="forgot-password" href="/welcome">Back</Link>
           </div>
         </div>
       </div>

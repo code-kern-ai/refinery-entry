@@ -10,11 +10,11 @@ import { useEffect, useState } from "react"
 import { ActionCard, CenterLink, LogoutLink, Flow, MarginCard } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { isDemoUser, isFreeTrial } from "."
+
 import { DemoFlow } from "@/pkg/ui/DemoFlow"
 import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 import ory from "@/pkg/sdk"
-import cors from 'cors';
+import { isDemoUser, isFreeTrial } from "@/util/constants"
 
 const Login: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<LoginFlow>()
@@ -36,14 +36,13 @@ const Login: NextPage = () => {
 
   // This might be confusing, but we want to show the user an option
   // to sign out if they are performing two-factor authentication!
-  const onLogout = LogoutLink([aal, refresh])
+  // const onLogout = LogoutLink([aal, refresh])
 
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
     if (!router.isReady || initialFlow) {
       return
     }
-
     // If ?flow=.. was in the URL, we fetch it
     if (flowId) {
       ory
@@ -69,15 +68,15 @@ const Login: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-    const data = { ...initialFlow };
+    const data: any = { ...initialFlow };
     if (data.ui.nodes[1].meta.label) {
       data.ui.nodes[1].meta.label.text = "Email address"
       if (isDemoUser) {
-        // data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
+        data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
       }
     }
     if (data.ui.nodes[2].meta.label && isDemoUser) {
-      // data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
+      data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
     }
     if (data.ui.nodes[3].meta.label && isDemoUser) {
       data.ui.nodes[3].meta.label.text = "Proceed"
@@ -86,37 +85,37 @@ const Login: NextPage = () => {
   }, [initialFlow, selectedRole])
 
   const onSubmit = (values: UpdateLoginFlowBody) =>
-    router
-      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-      // his data when she/he reloads the page.
-      .push(`/login?flow=${initialFlow?.id}`, undefined, { shallow: true })
-      .then(() =>
-        ory
-          .updateLoginFlow({
-            flow: String(initialFlow?.id),
-            updateLoginFlowBody: values,
-          })
-          // We logged in successfully! Let's bring the user home.
-          .then(() => {
-            if (initialFlow?.return_to) {
-              window.location.href = initialFlow?.return_to
-              return
-            }
-            router.push("/")
-          })
-          .then(() => { })
-          .catch(handleFlowError(router, "login", setInitialFlow))
-          .catch((err: AxiosError) => {
-            // If the previous handler did not catch the error it's most likely a form validation error
-            if (err.response?.status === 400) {
-              // Yup, it is!
-              setInitialFlow(err.response?.data)
-              return
-            }
+    // router
+    //   // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
+    //   // his data when she/he reloads the page.
+    //   .push(`/login?flow=${initialFlow?.id}`, undefined, { shallow: true })
+    //   .then(() =>
+    ory
+      .updateLoginFlow({
+        flow: String(initialFlow?.id),
+        updateLoginFlowBody: values,
+      })
+      // We logged in successfully! Let's bring the user home.
+      .then(() => {
+        if (initialFlow?.return_to) {
+          window.location.href = initialFlow?.return_to
+          return
+        }
+        router.push("/welcome")
+      })
+      .then(() => { })
+      .catch(handleFlowError(router, "login", setInitialFlow))
+      .catch((err: AxiosError) => {
+        // If the previous handler did not catch the error it's most likely a form validation error
+        if (err.response?.status === 400) {
+          // Yup, it is!
+          setInitialFlow(err.response?.data)
+          return
+        }
 
-            return Promise.reject(err)
-          }),
-      )
+        return Promise.reject(err)
+      })
+  // )
 
   return (
     <>
@@ -131,12 +130,12 @@ const Login: NextPage = () => {
           {!isDemoUser ? (
             <>{isFreeTrial ? (
               <p className="text-paragraph">Or
-                <a className="link" data-testid="cta-link" href="/registration">&nbsp;start your 14-day free trial</a>
+                <Link className="link" data-testid="cta-link" href="/registration">&nbsp;start your 14-day free trial</Link>
                 - no credit card required!
               </p>
             ) : (<>
               <p className="text-paragraph">You don't have an account yet?
-                <a className="link" data-testid="cta-link" href="/registration">&nbsp;Sign up here (local)</a>
+                <Link className="link" data-testid="cta-link" href="/registration">&nbsp;Sign up here (local)</Link>
               </p>
             </>)}</>
           ) : (<></>)}
@@ -163,7 +162,7 @@ const Login: NextPage = () => {
             </>)}
           </div>
           <div className="link-container">
-            {!isDemoUser ? (<a className="link" data-testid="forgot-password" href="recovery">Forgot your password?</a>) : (<></>)}
+            {!isDemoUser ? (<Link className="link" data-testid="forgot-password" href="/recovery">Forgot your password?</Link>) : (<></>)}
           </div>
         </div>
       </div >

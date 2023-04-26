@@ -67,9 +67,7 @@ const Verification: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return
-    if (initialFlow.ui.nodes[1].meta.label) {
-      initialFlow.ui.nodes[1].meta.label.text = "Email address"
-    }
+    initialFlow.ui.nodes[1].meta.label = { text: "Email address", id: 0, type: "info" }
     setChangedFlow(initialFlow)
   }, [initialFlow])
 
@@ -125,7 +123,7 @@ const Verification: NextPage = () => {
           <h2 className="title">Verify your account</h2>
           <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/login">Go back to login</a>
+            <Link className="link" data-testid="forgot-password" href="/login">Go back to login</Link>
           </div>
         </div>
       </div>

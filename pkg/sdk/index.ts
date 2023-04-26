@@ -1,11 +1,9 @@
 import { Configuration } from '@ory/kratos-client';
-import { edgeConfig } from "@ory/integrations/next"
 import { FrontendApi } from '@ory/client';
-
 
 const ory = new FrontendApi(
     new Configuration({
-        basePath: "http://localhost:4455/.ory/kratos/public",
+        basePath: process.env.ORY_SDK_URL + '/.ory/kratos/public',
         baseOptions: {
             headers: {
                 'Accept': 'application/json',
@@ -18,6 +16,4 @@ const ory = new FrontendApi(
     })
 );
 
-// export default ory;
-
-export default new FrontendApi(new Configuration(edgeConfig))
+export default ory;

@@ -5,16 +5,12 @@ import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-
-// Import render helpers
-import { ActionCard, CenterLink, Flow, MarginCard } from "../pkg"
-import { handleFlowError } from "../pkg/errors"
-// Import the SDK
-import ory from "../pkg/sdk"
 import Link from "next/link"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { isFreeTrial } from "."
-import { firstName, lastName } from "@/util/constants"
+import { firstName, isFreeTrial, lastName } from "@/util/constants"
+import ory from "@/pkg/sdk"
+import { handleFlowError } from "@/pkg/errors"
+import { Flow } from "@/pkg"
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -22,7 +18,7 @@ const Registration: NextPage = () => {
 
   // The "flow" represents a registration process and contains
   // information about the form we need to render (e.g. username + password)
-  const [initialFlow, setInitialFlow] = useState<RegistrationFlow>()
+  const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>()
 
   // Get ?flow=... from the URL
   const { flow: flowId, return_to: returnTo } = router.query
@@ -62,9 +58,13 @@ const Registration: NextPage = () => {
     if (initialFlow.ui.nodes[1].meta.label) {
       initialFlow.ui.nodes[1].meta.label.text = "Email address"
     }
-    initialFlow.ui.nodes.splice(3, 0, firstName);
-    initialFlow.ui.nodes.splice(4, 0, lastName);
-    setInitialFlow(initialFlow)
+    if (initialFlow.ui.nodes[3].attributes.name === "traits.name.first") {
+      initialFlow.ui.nodes[3].attributes.required = true
+    }
+    if (initialFlow.ui.nodes[4].attributes.name === "traits.name.last") {
+      initialFlow.ui.nodes[4].attributes.required = true
+    }
+    setInitialFlow(initialFlow);
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateRegistrationFlowBody) => {
@@ -125,7 +125,7 @@ const Registration: NextPage = () => {
           <h2 className="title">{isFreeTrial ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
           <Flow onSubmit={onSubmit} flow={initialFlow} />
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/login">Go back to login</a>
+            <Link className="link" data-testid="forgot-password" href="/login">Go back to login</Link>
           </div>
         </div>
       </div>
