@@ -40,6 +40,8 @@ function SettingsCard({
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<SettingsFlow>()
   const [changedFlow, setChangedFlow] = useState<SettingsFlow>()
+  const [containsTotp, setContainsTotp] = useState<boolean>(false)
+  const [containsBackupCodes, setContainsBackupCodes] = useState<boolean>(false)
 
   // Get ?flow=... from the URL
   const router = useRouter()
@@ -77,6 +79,14 @@ const Settings: NextPage = () => {
     if (!initialFlow) return;
     if (initialFlow.ui.nodes[1].meta.label) {
       initialFlow.ui.nodes[1].meta.label.text = "Email address";
+    }
+    const checkIfTotp = initialFlow.ui.nodes.find((node) => node.group === "totp");
+    const checkIfBackupCodes = initialFlow.ui.nodes.find((node) => node.group === "lookup_secret");
+    if (checkIfTotp) {
+      setContainsTotp(true);
+    }
+    if (checkIfBackupCodes) {
+      setContainsBackupCodes(true);
     }
     setChangedFlow(initialFlow)
   }, [initialFlow])
@@ -156,7 +166,7 @@ const Settings: NextPage = () => {
             />
           </div>
 
-          <div className="form-container">
+          {containsBackupCodes ? (<div className="form-container">
             <h3 className="subtitle">Manage 2FA backup recovery codes</h3>
             <p>Recovery codes can be used in panic situations where you have lost access to your 2FA device.</p>
             <Messages messages={changedFlow?.ui.messages} />
@@ -166,9 +176,9 @@ const Settings: NextPage = () => {
               only="lookup_secret"
               flow={changedFlow}
             />
-          </div>
+          </div>) : (<> </>)}
 
-          <div className="form-container">
+          {containsTotp ? (<div className="form-container">
             <h3 className="subtitle">Manage 2FA TOTP Authenticator App</h3>
             <p>Add a TOTP Authenticator App to your account to improve your account security.
               Popular Authenticator Apps are <a href="https://www.lastpass.com" target="_blank">LastPass</a> and Google
@@ -184,7 +194,7 @@ const Settings: NextPage = () => {
               only="totp"
               flow={changedFlow}
             />
-          </div>
+          </div>) : (<> </>)}
 
           <div className="link-container">
             <Link className="link" data-testid="forgot-password" href="/welcome">Back</Link>
