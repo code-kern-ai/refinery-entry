@@ -130,12 +130,12 @@ const Login: NextPage = () => {
           {!isDemoUser ? (
             <>{isFreeTrial ? (
               <p className="text-paragraph">Or
-                <Link className="link" data-testid="cta-link" href="/registration">&nbsp;start your 14-day free trial</Link>
+                <a className="link" data-testid="cta-link" href="/auth/registration">&nbsp;start your 14-day free trial</a>
                 - no credit card required!
               </p>
             ) : (<>
               <p className="text-paragraph">You don't have an account yet?
-                <Link className="link" data-testid="cta-link" href="/registration">&nbsp;Sign up here (local)</Link>
+                <a className="link" data-testid="cta-link" href="/auth/registration">&nbsp;Sign up here (local)</a>
               </p>
             </>)}</>
           ) : (<></>)}
@@ -162,7 +162,7 @@ const Login: NextPage = () => {
             </>)}
           </div>
           <div className="link-container">
-            {!isDemoUser ? (<Link className="link" data-testid="forgot-password" href="/recovery">Forgot your password?</Link>) : (<></>)}
+            {!isDemoUser ? (<a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>) : (<></>)}
           </div>
         </div>
       </div >

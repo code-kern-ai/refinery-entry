@@ -54,7 +54,7 @@ const Login: NextPage = () => {
         <div id="error">
           <h2 className="title">An error occurred</h2>
           <div className="link-container">
-            <Link className="link" data-testid="back-button" href="/login">Go back to login</Link>
+            <a className="link" data-testid="back-button" href="/auth/login">Go back to login</a>
           </div>
         </div>
       </div>

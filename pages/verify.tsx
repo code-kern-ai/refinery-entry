@@ -38,7 +38,7 @@ const Verification: NextPage = () => {
             // Status code 410 means the request has expired - so let's load a fresh flow!
             case 403:
               // Status code 403 implies some other issue (e.g. CSRF) - let's reload!
-              return router.push("/verification")
+              return router.push("/verify")
           }
 
           throw err
@@ -75,7 +75,7 @@ const Verification: NextPage = () => {
     await router
       // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
       // their data when they reload the page.
-      .push(`/verification?flow=${initialFlow?.id}`, undefined, { shallow: true })
+      .push(`/verify?flow=${initialFlow?.id}`, undefined, { shallow: true })
 
     ory
       .updateVerificationFlow({
@@ -97,7 +97,7 @@ const Verification: NextPage = () => {
             router
               // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
               // their data when they reload the page.
-              .push(`/verification?flow=${newFlowID}`, undefined, {
+              .push(`/verify?flow=${newFlowID}`, undefined, {
                 shallow: true,
               })
 
@@ -123,7 +123,7 @@ const Verification: NextPage = () => {
           <h2 className="title">Verify your account</h2>
           <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
-            <Link className="link" data-testid="forgot-password" href="/login">Go back to login</Link>
+            <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>
         </div>
       </div>

@@ -91,7 +91,7 @@ const Registration: NextPage = () => {
           for (item of data.continue_with) {
             switch (item.action) {
               case "show_verification_ui":
-                await router.push("/verification?flow=" + item.flow.id)
+                await router.push("/verify?flow=" + item.flow.id)
                 return
             }
           }
@@ -125,7 +125,7 @@ const Registration: NextPage = () => {
           <h2 className="title">{isFreeTrial ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
           <Flow onSubmit={onSubmit} flow={initialFlow} />
           <div className="link-container">
-            <Link className="link" data-testid="forgot-password" href="/login">Go back to login</Link>
+            <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>
         </div>
       </div>

@@ -105,7 +105,7 @@ const Recovery: NextPage = () => {
           <h2 className="title">Recover your account</h2>
           <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
-            <Link className="link" data-testid="forgot-password" href="/login">Go back to login</Link>
+            <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>
         </div>
       </div>
