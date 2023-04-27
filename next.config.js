@@ -7,7 +7,8 @@ const nextConfig = {
     scrollRestoration: true,
   },
   env: {
-    ORY_SDK_URL: "http://localhost:4455"
+    ORY_SDK_URL: process.env.ORY_SDK_URL,
+    KRATOS_BROWSER_URL: process.env.KRATOS_BROWSER_URL,
   }
 
 }
