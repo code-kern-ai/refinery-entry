@@ -3,7 +3,7 @@ import { FrontendApi } from '@ory/client';
 
 const ory = new FrontendApi(
     new Configuration({
-        basePath: process.env.ORY_SDK_URL + '' + process.env.KRATOS_BROWSER_URL,
+        basePath: process.env.KRATOS_BROWSER_URL,
         baseOptions: {
             headers: {
                 'Accept': 'application/json',

@@ -12,6 +12,7 @@ docker run --rm -d \
 --network dev-setup_default \
 -e IS_OS=0 \
 -e IS_DEMO=0 \
+-e KRATOS_BROWSER_URL=/.ory/kratos/public/ \
 refinery-entry-dev
 
 docker logs -f refinery-entry
