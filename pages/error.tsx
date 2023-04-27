@@ -10,7 +10,7 @@ import { ActionCard, CenterLink, MarginCard } from "../pkg"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 
-const Login: NextPage = () => {
+const Error: NextPage = () => {
   const [error, setError] = useState<FlowError | string>()
 
   // Get ?id=... from the URL
@@ -29,17 +29,7 @@ const Login: NextPage = () => {
         setError(data)
       })
       .catch((err: AxiosError) => {
-        switch (err.response?.status) {
-          case 404:
-          // The error id could not be found. Let's just redirect home!
-          case 403:
-          // The error id could not be fetched due to e.g. a CSRF issue. Let's just redirect home!
-          case 410:
-            // The error id expired. Let's just redirect home!
-            return router.push("/welcome")
-        }
-
-        return Promise.reject(err)
+        return router.push("/welcome")
       })
   }, [id, router, router.isReady, error])
 
