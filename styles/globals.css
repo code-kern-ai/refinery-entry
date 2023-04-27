@@ -183,9 +183,19 @@ button.button-sign-in:focus {
     }
 }
 
+.message {
+    padding: 6px;
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 20px;
+}
+
 .success {
-    border: 1px solid #5AB370;
     color: #5AB370;
+}
+
+.error {
+    color: #DC2626;
 }
 
 .select {
