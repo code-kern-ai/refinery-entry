@@ -11,6 +11,7 @@ const nextConfig = {
     KRATOS_BROWSER_URL: process.env.KRATOS_BROWSER_URL,
 
   }
+
 }
 
 module.exports = nextConfig
