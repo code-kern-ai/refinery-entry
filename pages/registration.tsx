@@ -1,13 +1,11 @@
 import { RegistrationFlow, UpdateRegistrationFlowBody } from "@ory/client"
-import { CardTitle } from "@ory/themes"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { firstName, isFreeTrial, lastName } from "@/util/constants"
+import { isFreeTrial } from "@/util/constants"
 import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
@@ -79,24 +77,6 @@ const Registration: NextPage = () => {
         updateRegistrationFlowBody: values,
       })
       .then(async ({ data }) => {
-        // If we ended up here, it means we are successfully signed up!
-        //
-        // You can do cool stuff here, like having access to the identity which just signed up:
-        console.log("This is the user session: ", data, data.identity)
-
-        // continue_with is a list of actions that the user might need to take before the registration is complete.
-        // It could, for example, contain a link to the verification form.
-        if (data.continue_with) {
-          let item: any;
-          for (item of data.continue_with) {
-            switch (item.action) {
-              case "show_verification_ui":
-                await router.push("/verify?flow=" + item.flow.id)
-                return
-            }
-          }
-        }
-
         // If continue_with did not contain anything, we can just return to the home page.
         await router.push(initialFlow?.return_to || "/")
       })

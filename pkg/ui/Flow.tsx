@@ -16,7 +16,6 @@ import { Component, FormEvent, MouseEvent } from "react"
 
 import { Messages } from "./Messages"
 import { Node } from "./Node"
-import { firstName, lastName } from "@/util/constants"
 
 export type Values = Partial<
   | UpdateLoginFlowBody

@@ -1,16 +1,14 @@
 import { RecoveryFlow, UpdateRecoveryFlowBody } from "@ory/client"
-import { CardTitle } from "@ory/themes"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
-import { Flow, ActionCard, CenterLink, MarginCard } from "../pkg"
+import { Flow } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
-import Link from "next/link"
 
 const Recovery: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<RecoveryFlow>()

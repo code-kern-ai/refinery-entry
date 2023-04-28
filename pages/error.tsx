@@ -1,12 +1,9 @@
 import { FlowError } from "@ory/client"
-import { CardTitle, CodeBox } from "@ory/themes"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
-import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
-import { ActionCard, CenterLink, MarginCard } from "../pkg"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 

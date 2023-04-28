@@ -1,13 +1,11 @@
 import { LoginFlow, UpdateLoginFlowBody } from "@ory/client"
-import { CardTitle } from "@ory/themes"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
-import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
-import { ActionCard, CenterLink, LogoutLink, Flow, MarginCard } from "../pkg"
+import { Flow } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
 import { KernLogo } from "@/pkg/ui/Icons"
 
@@ -33,10 +31,6 @@ const Login: NextPage = () => {
     // to perform two-factor authentication/verification.
     aal,
   } = router.query
-
-  // This might be confusing, but we want to show the user an option
-  // to sign out if they are performing two-factor authentication!
-  // const onLogout = LogoutLink([aal, refresh])
 
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
@@ -85,11 +79,6 @@ const Login: NextPage = () => {
   }, [initialFlow, selectedRole])
 
   const onSubmit = (values: UpdateLoginFlowBody) =>
-    // router
-    //   // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-    //   // his data when she/he reloads the page.
-    //   .push(`/login?flow=${initialFlow?.id}`, undefined, { shallow: true })
-    //   .then(() =>
     ory
       .updateLoginFlow({
         flow: String(initialFlow?.id),
@@ -115,7 +104,6 @@ const Login: NextPage = () => {
 
         return Promise.reject(err)
       })
-  // )
 
   return (
     <>

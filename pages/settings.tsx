@@ -1,41 +1,14 @@
 import { SettingsFlow, UpdateSettingsFlowBody } from "@ory/client"
-import { CardTitle, H3, P } from "@ory/themes"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
-import Link from "next/link"
 import { useRouter } from "next/router"
-import { ReactNode, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
-import { ActionCard, CenterLink, Flow, Messages, Methods } from "../pkg"
+import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
-
-interface Props {
-  flow?: SettingsFlow
-  only?: Methods
-}
-
-function SettingsCard({
-  flow,
-  only,
-  children,
-}: Props & { children: ReactNode }) {
-  if (!flow) {
-    return null
-  }
-
-  const nodes = only
-    ? flow.ui.nodes.filter(({ group }) => group === only)
-    : flow.ui.nodes
-
-  if (nodes.length === 0) {
-    return null
-  }
-
-  return <ActionCard wide>{children}</ActionCard>
-}
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<SettingsFlow>()
@@ -105,19 +78,6 @@ const Settings: NextPage = () => {
           .then(({ data }) => {
             // The settings have been saved and the flow was updated. Let's show it to the user!
             setInitialFlow(data)
-
-            // continue_with is a list of actions that the user might need to take before the settings update is complete.
-            // It could, for example, contain a link to the verification form.
-            // if (data.continue_with) {
-            //   let item: any;
-            //   for (item of data.continue_with) {
-            //     switch (item.action) {
-            //       case "show_verification_ui":
-            //         router.push("/verification?flow=" + item.flow.id)
-            //         return
-            //     }
-            //   }
-            // }
           })
           .catch(handleFlowError(router, "settings", setInitialFlow))
           .catch(async (err: AxiosError) => {
