@@ -108,7 +108,7 @@ const Login: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Login</title>
+        <title>kern</title>
         <meta name="description" content="NextJS + React + Vercel + Ory" />
       </Head>
       <div className="app-container">

@@ -15,7 +15,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Admin Dashboard</title>
+        <title>kern</title>
         <link rel="icon" type="image/x-icon"
           href="https://uploads-ssl.webflow.com/61e47fafb12bd56b40022a49/62349d6d1d8f3f519b8fad79_kern-favicon.png"></link>
       </Head>
