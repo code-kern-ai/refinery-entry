@@ -5,7 +5,7 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { isFreeTrial } from "@/util/constants"
+import { isManagedApp } from "@/util/constants"
 import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
@@ -102,7 +102,7 @@ const Registration: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="signup">
-          <h2 className="title">{isFreeTrial ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
+          <h2 className="title">{isManagedApp ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
           <Flow onSubmit={onSubmit} flow={initialFlow} />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>

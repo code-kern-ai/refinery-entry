@@ -12,7 +12,7 @@ import { KernLogo } from "@/pkg/ui/Icons"
 import { DemoFlow } from "@/pkg/ui/DemoFlow"
 import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 import ory from "@/pkg/sdk"
-import { isDemoUser, isFreeTrial } from "@/util/constants"
+import { isDemoUser, isManagedApp } from "@/util/constants"
 
 const Login: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<LoginFlow>()
@@ -116,7 +116,7 @@ const Login: NextPage = () => {
         <div id="login">
           <h2 className="title">{isDemoUser ? 'Proceed with your selected role' : 'Sign in to your account'}</h2>
           {!isDemoUser ? (
-            <>{isFreeTrial ? (
+            <>{isManagedApp ? (
               <p className="text-paragraph">Or
                 <a className="link" data-testid="cta-link" href="/auth/registration"> start your 14-day free trial</a>
                 - no credit card required!
