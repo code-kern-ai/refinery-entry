@@ -12,12 +12,14 @@ import { KernLogo } from "@/pkg/ui/Icons"
 import { DemoFlow } from "@/pkg/ui/DemoFlow"
 import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 import ory from "@/pkg/sdk"
-import { isDemoUser, isManagedApp } from "@/util/constants"
+import { MiscInfo } from "@/services/basic-fetch/misc"
 
 const Login: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<LoginFlow>()
   const [changedFlow, setChangedFlow] = useState<LoginFlow>()
   const [selectedRole, setSelectedRole] = useState<string | undefined>('engineer');
+  const isManaged = MiscInfo.isManaged;
+  const isDemo = MiscInfo.isDemo;
 
   // Get ?flow=... from the URL
   const router = useRouter()
@@ -65,14 +67,14 @@ const Login: NextPage = () => {
     const data: any = { ...initialFlow };
     if (data.ui.nodes[1].meta.label) {
       data.ui.nodes[1].meta.label.text = "Email address"
-      if (isDemoUser) {
+      if (isDemo) {
         data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
       }
     }
-    if (data.ui.nodes[2].meta.label && isDemoUser) {
+    if (data.ui.nodes[2].meta.label && isDemo) {
       data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
     }
-    if (data.ui.nodes[3].meta.label && isDemoUser) {
+    if (data.ui.nodes[3].meta.label && isDemo) {
       data.ui.nodes[3].meta.label.text = "Proceed"
     }
     setChangedFlow(data);
@@ -114,9 +116,9 @@ const Login: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="login">
-          <h2 className="title">{isDemoUser ? 'Proceed with your selected role' : 'Sign in to your account'}</h2>
-          {!isDemoUser ? (
-            <>{isManagedApp ? (
+          <h2 className="title">{isDemo ? 'Proceed with your selected role' : 'Sign in to your account'}</h2>
+          {!isDemo ? (
+            <>{MiscInfo.isManaged ? (
               <p className="text-paragraph">Or
                 <a className="link" data-testid="cta-link" href="/auth/registration"> start your 14-day free trial</a>
                 - no credit card required!
@@ -128,7 +130,7 @@ const Login: NextPage = () => {
             </>)}</>
           ) : (<></>)}
           <div className="ui-container">
-            {!isDemoUser ? (<Flow onSubmit={onSubmit} flow={changedFlow} />) : (<>
+            {!isDemo ? (<Flow onSubmit={onSubmit} flow={changedFlow} />) : (<>
               <fieldset>
                 <span className="typography-h3">
                   Select role
@@ -150,7 +152,7 @@ const Login: NextPage = () => {
             </>)}
           </div>
           <div className="link-container">
-            {!isDemoUser ? (<a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>) : (<></>)}
+            {!isDemo ? (<a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>) : (<></>)}
           </div>
         </div>
       </div >

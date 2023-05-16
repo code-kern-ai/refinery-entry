@@ -5,10 +5,10 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { isManagedApp } from "@/util/constants"
 import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
+import { MiscInfo } from "@/services/basic-fetch/misc"
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -19,7 +19,8 @@ const Registration: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>()
 
   // Get ?flow=... from the URL
-  const { flow: flowId, return_to: returnTo } = router.query
+  const { flow: flowId, return_to: returnTo } = router.query;
+  const isManaged = MiscInfo.isManaged;
 
   // In this effect we either initiate a new registration flow, or we fetch an existing registration flow.
   useEffect(() => {
@@ -102,7 +103,7 @@ const Registration: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="signup">
-          <h2 className="title">{isManagedApp ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
+          <h2 className="title">{isManaged ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
           <Flow onSubmit={onSubmit} flow={initialFlow} />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>

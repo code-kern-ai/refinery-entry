@@ -13,7 +13,7 @@ import { NodeInput } from "./NodeInput"
 import { NodeScript } from "./NodeScript"
 import { NodeText } from "./NodeText"
 import { FormDispatcher, ValueSetter } from "./helpers"
-import { isDemoUser } from "@/util/constants"
+import { MiscInfo } from "@/services/basic-fetch/misc"
 
 
 interface Props {
@@ -56,7 +56,7 @@ export const Node = ({
         node={node}
         disabled={disabled}
         attributes={node.attributes}
-        visible={!isDemoUser}
+        visible={!MiscInfo.isDemo}
       />
     )
   }

@@ -19,13 +19,13 @@ function GetUserManagerWrapper(props: React.PropsWithChildren) {
     }, []);
 
     useEffect(() => {
-        if (!isManaged || !isDemo) return;
+        if (isManaged == null || isDemo == null) return;
         MiscInfo.isManaged = isManaged;
         MiscInfo.isDemo = isDemo;
         setDataLoaded(true);
     }, [isManaged, isDemo]);
     if (!dataLoaded) return null;
-    return <div>Test{props.children}</div>;
+    return <div>{props.children}</div>;
 }
 
 export const UserManagerWrapper = memo(GetUserManagerWrapper);
