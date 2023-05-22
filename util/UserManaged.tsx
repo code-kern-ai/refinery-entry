@@ -1,4 +1,4 @@
-import { memo, use, useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { MiscInfo } from "../services/basic-fetch/misc";
 import { getIsDemo, getIsManaged } from "./data-fetch";
 

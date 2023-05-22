@@ -20,7 +20,6 @@ const Registration: NextPage = () => {
 
   // Get ?flow=... from the URL
   const { flow: flowId, return_to: returnTo } = router.query;
-  const isManaged = MiscInfo.isManaged;
 
   // In this effect we either initiate a new registration flow, or we fetch an existing registration flow.
   useEffect(() => {
@@ -103,7 +102,7 @@ const Registration: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="signup">
-          <h2 className="title">{isManaged ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
+          <h2 className="title">{MiscInfo.isManaged ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
           <Flow onSubmit={onSubmit} flow={initialFlow} />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
