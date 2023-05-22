@@ -1,3 +1,4 @@
+import { UserManagerWrapper } from "@/util/UserManaged"
 import "../styles/globals.css"
 import { theme, globalStyles, ThemeProps } from "@ory/themes"
 import type { AppProps } from "next/app"
@@ -22,7 +23,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       <div data-testid="app-react">
         <ThemeProvider theme={theme}>
           <GlobalStyle />
-          <Component {...pageProps} />
+          <UserManagerWrapper>
+            <Component {...pageProps} />
+          </UserManagerWrapper>
           <ToastContainer />
         </ThemeProvider>
       </div>
