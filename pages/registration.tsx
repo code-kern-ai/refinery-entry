@@ -66,11 +66,6 @@ const Registration: NextPage = () => {
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateRegistrationFlowBody) => {
-    await router
-      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-      // his data when she/he reloads the page.
-      .push(`/registration?flow=${initialFlow?.id}`, undefined, { shallow: true })
-
     ory
       .updateRegistrationFlow({
         flow: String(initialFlow?.id),

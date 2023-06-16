@@ -171,6 +171,18 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
     const { hideGlobalMessages, flow } = this.props
     const { values, isLoading } = this.state
 
+    if (flow !== undefined && flow.ui.messages == undefined) {
+      const messages: any[] = [];
+      flow.ui.nodes.forEach((node: any) => {
+        if (node.messages.length > 0) {
+          node.messages.forEach((message: any) => {
+            messages.push(message);
+          });
+        }
+      });
+      flow.ui = { ...flow?.ui, messages: messages };
+    }
+
     // Filter the nodes - only show the ones we want
     const nodes = this.filterNodes()
 
