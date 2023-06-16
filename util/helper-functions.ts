@@ -21,3 +21,18 @@ export function getValuePassword(selectedRole: any) {
     }
     return value;
 }
+
+export function checkIfThereAreMoreMessages(flow: any) {
+    if (flow !== undefined && flow.ui.messages == undefined) {
+        const messages: any[] = [];
+        flow.ui.nodes.forEach((node: any) => {
+            if (node.messages.length > 0) {
+                node.messages.forEach((message: any) => {
+                    messages.push(message);
+                });
+            }
+        });
+        flow.ui = { ...flow?.ui, messages: messages };
+    }
+    return flow;
+}
