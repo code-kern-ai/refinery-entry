@@ -9,6 +9,7 @@ import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
 import { MiscInfo } from "@/services/basic-fetch/misc"
+import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -56,12 +57,7 @@ const Registration: NextPage = () => {
     if (initialFlow.ui.nodes[1].meta.label) {
       initialFlow.ui.nodes[1].meta.label.text = "Email address"
     }
-    if (initialFlow.ui.nodes[3].attributes.name === "traits.name.first") {
-      initialFlow.ui.nodes[3].attributes.required = true
-    }
-    if (initialFlow.ui.nodes[4].attributes.name === "traits.name.last") {
-      initialFlow.ui.nodes[4].attributes.required = true
-    }
+    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
     setInitialFlow(initialFlow);
   }, [initialFlow])
 

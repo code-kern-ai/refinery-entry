@@ -1,4 +1,4 @@
-import { SettingsFlow, UpdateSettingsFlowBody } from "@ory/client"
+import { SettingsFlow, UiNode, UpdateSettingsFlowBody } from "@ory/client"
 import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
@@ -9,10 +9,11 @@ import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
+import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
 
 const Settings: NextPage = () => {
-  const [initialFlow, setInitialFlow] = useState<SettingsFlow>()
-  const [changedFlow, setChangedFlow] = useState<SettingsFlow>()
+  const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
+  const [changedFlow, setChangedFlow]: any = useState<SettingsFlow>()
   const [containsTotp, setContainsTotp] = useState<boolean>(false)
   const [containsBackupCodes, setContainsBackupCodes] = useState<boolean>(false)
 
@@ -53,8 +54,9 @@ const Settings: NextPage = () => {
     if (initialFlow.ui.nodes[1].meta.label) {
       initialFlow.ui.nodes[1].meta.label.text = "Email address";
     }
-    const checkIfTotp = initialFlow.ui.nodes.find((node) => node.group === "totp");
-    const checkIfBackupCodes = initialFlow.ui.nodes.find((node) => node.group === "lookup_secret");
+    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(2, 3, initialFlow);
+    const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
+    const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
     if (checkIfTotp) {
       setContainsTotp(true);
     }
@@ -65,10 +67,11 @@ const Settings: NextPage = () => {
   }, [initialFlow])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
-    router
-      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-      // his data when she/he reloads the page.
-      .push(`/settings?flow=${initialFlow?.id}`, undefined, { shallow: true })
+    ory
+      .updateSettingsFlow({
+        flow: String(initialFlow?.id),
+        updateSettingsFlowBody: values,
+      })
       .then(() =>
         ory
           .updateSettingsFlow({
@@ -91,7 +94,6 @@ const Settings: NextPage = () => {
             return Promise.reject(err)
           }),
       )
-
   return (
     <>
       <Head>

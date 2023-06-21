@@ -16,7 +16,7 @@ import { Component, FormEvent, MouseEvent } from "react"
 
 import { Messages } from "./Messages"
 import { Node } from "./Node"
-import { checkIfThereAreMoreMessages } from "@/util/helper-functions"
+import { refactorFlowWithMoreMessages } from "@/util/helper-functions"
 
 export type Values = Partial<
     | UpdateLoginFlowBody
@@ -170,7 +170,7 @@ export class DemoFlow<T extends Values> extends Component<Props<T>, State<T>> {
 
     render() {
         const { values, isLoading } = this.state
-        const flow = checkIfThereAreMoreMessages(this.props.flow)
+        const flow = refactorFlowWithMoreMessages(this.props.flow)
 
         // Filter the nodes - only show the ones we want
         const nodes = this.filterNodes()
