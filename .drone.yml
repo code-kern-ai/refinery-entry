@@ -6,12 +6,6 @@ platform:
   arch: amd64
 
 steps:
-  - name: submodules
-    image: alpine/git
-    commands:
-      - git submodule init
-      - 'git config --global url."https://github.com/".insteadOf git@github.com:'
-      - "git submodule update --recursive --remote"
   - name: build and publish
     image: plugins/docker
     settings:
@@ -30,9 +24,6 @@ trigger:
   event:
     - push
 
-image_pull_secrets:
-  - dockerconfigjson
-
 ---
 kind: pipeline
 type: docker
@@ -44,7 +35,6 @@ platform:
 steps:
   - name: trigger update
     image: appleboy/drone-ssh
-    failure: ignore
     settings:
       host: app.dev.onetask.ai
       username:
@@ -74,12 +64,6 @@ platform:
   arch: arm64
 
 steps:
-  - name: submodules
-    image: alpine/git
-    commands:
-      - git submodule init
-      - 'git config --global url."https://github.com/".insteadOf git@github.com:'
-      - "git submodule update --recursive --remote"
   - name: build and publish
     image: plugins/docker
     settings:
@@ -109,12 +93,6 @@ platform:
   arch: amd64
 
 steps:
-  - name: submodules
-    image: alpine/git
-    commands:
-      - git submodule init
-      - 'git config --global url."https://github.com/".insteadOf git@github.com:'
-      - "git submodule update --recursive --remote"
   - name: build and publish
     image: plugins/docker
     settings:
@@ -138,12 +116,6 @@ platform:
   arch: arm64
 
 steps:
-  - name: submodules
-    image: alpine/git
-    commands:
-      - git submodule init
-      - 'git config --global url."https://github.com/".insteadOf git@github.com:'
-      - "git submodule update --recursive --remote"
   - name: build and publish
     image: plugins/docker
     settings:
