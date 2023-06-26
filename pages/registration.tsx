@@ -18,6 +18,7 @@ const Registration: NextPage = () => {
   // The "flow" represents a registration process and contains
   // information about the form we need to render (e.g. username + password)
   const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>()
+  const [changedFlow, setChangedFlow]: any = useState<RegistrationFlow>()
 
   // Get ?flow=... from the URL
   const { flow: flowId, return_to: returnTo } = router.query;
@@ -58,7 +59,7 @@ const Registration: NextPage = () => {
       initialFlow.ui.nodes[1].meta.label.text = "Email address"
     }
     initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
-    setInitialFlow(initialFlow);
+    setChangedFlow(initialFlow);
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateRegistrationFlowBody) => {
@@ -94,7 +95,7 @@ const Registration: NextPage = () => {
         <KernLogo />
         <div id="signup">
           <h2 className="title">{MiscInfo.isManaged ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
-          <Flow onSubmit={onSubmit} flow={initialFlow} />
+          <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>
