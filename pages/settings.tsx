@@ -72,28 +72,21 @@ const Settings: NextPage = () => {
         flow: String(initialFlow?.id),
         updateSettingsFlowBody: values,
       })
-      .then(() =>
-        ory
-          .updateSettingsFlow({
-            flow: String(initialFlow?.id),
-            updateSettingsFlowBody: values,
-          })
-          .then(({ data }) => {
-            // The settings have been saved and the flow was updated. Let's show it to the user!
-            setInitialFlow(data)
-          })
-          .catch(handleFlowError(router, "settings", setInitialFlow))
-          .catch(async (err: AxiosError) => {
-            // If the previous handler did not catch the error it's most likely a form validation error
-            if (err.response?.status === 400) {
-              // Yup, it is!
-              setInitialFlow(err.response?.data)
-              return
-            }
+      .then(({ data }) => {
+        // The settings have been saved and the flow was updated. Let's show it to the user!
+        setInitialFlow(data)
+      })
+      .catch(handleFlowError(router, "settings", setInitialFlow))
+      .catch(async (err: AxiosError) => {
+        // If the previous handler did not catch the error it's most likely a form validation error
+        if (err.response?.status === 400) {
+          // Yup, it is!
+          setInitialFlow(err.response?.data)
+          return
+        }
 
-            return Promise.reject(err)
-          }),
-      )
+        return Promise.reject(err)
+      })
   return (
     <>
       <Head>
