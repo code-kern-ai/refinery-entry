@@ -1,4 +1,3 @@
-import { jsonFetchWrapper } from "@/submodules/javascript-functions/basic-fetch";
 import { MiscInfo } from "./misc";
 
 export enum FetchType {
@@ -8,13 +7,31 @@ export enum FetchType {
     DELETE = "DELETE",
 }
 
-export function jsonFetchWrapperChecksDemo(url: string, fetchType: FetchType, onResult?: (result: any) => void, body?: BodyInit, headers?: any, onError?: (response: any) => void) {
+export function jsonFetchWrapper(url: string, fetchType: FetchType, onResult?: (result: any) => void, body?: BodyInit, headers?: any, onError?: (response: any) => void) {
     if (!canRequestInDemoAccess(fetchType)) {
         console.log("Cannot request in demo access")
         alertUser();
         return;
     }
-    jsonFetchWrapper(url, fetchType, onResult, body, headers, onError);
+    // can't use submodule because of drone build issues. Copied instead
+    if (!headers) headers = {};
+    headers["Content-Type"] = "application/json";
+
+    let hasError = false;
+    let myFetch = fetch(url, {
+        method: fetchType,
+        headers: headers,
+        body: body,
+    }).then(response => {
+        if (!response.ok) {
+            if (onError) onError(response);
+            else throw new Error("Error in request at " + url);
+            hasError = true;
+        }
+        else return response.json();
+    });
+
+    if (onResult && !hasError) myFetch.then(result => onResult(result));
 }
 
 
