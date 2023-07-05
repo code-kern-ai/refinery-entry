@@ -16,6 +16,7 @@ import { Component, FormEvent, MouseEvent } from "react"
 
 import { Messages } from "./Messages"
 import { Node } from "./Node"
+import { refactorFlowWithMoreMessages } from "@/util/helper-functions"
 
 export type Values = Partial<
   | UpdateLoginFlowBody
@@ -168,8 +169,8 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
   }
 
   render() {
-    const { hideGlobalMessages, flow } = this.props
     const { values, isLoading } = this.state
+    const flow = refactorFlowWithMoreMessages(this.props.flow)
 
     // Filter the nodes - only show the ones we want
     const nodes = this.filterNodes()
@@ -187,7 +188,7 @@ export class Flow<T extends Values> extends Component<Props<T>, State<T>> {
         method={flow.ui.method}
         onSubmit={this.handleSubmit}
       >
-        {!hideGlobalMessages ? <Messages messages={flow.ui.messages} /> : null}
+        {!this.props.hideGlobalMessages ? <Messages messages={flow.ui.messages} /> : null}
         {nodes.map((node, k) => {
           const id = getNodeId(node) as keyof Values
           return <Node

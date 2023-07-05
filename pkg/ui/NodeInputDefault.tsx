@@ -2,6 +2,7 @@ import { TextInput } from "@ory/themes"
 
 import { NodeInputProps } from "./helpers"
 import { getNodeLabel } from "@ory/integrations/ui"
+import { Message } from "./Messages"
 
 export function NodeInputDefault<T>(props: NodeInputProps) {
   const { node, attributes, value = "", setValue, disabled } = props
@@ -37,10 +38,8 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
       }
       subtitle={
         <>
-          {node.messages.map(({ text, id }, k) => (
-            <span key={`${id}-${k}`} data-testid={`ui/message/${id}`}>
-              {text}
-            </span>
+          {node.messages.forEach((message: any) => (
+            <Message message={message} />
           ))}
         </>
       }

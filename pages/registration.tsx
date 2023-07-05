@@ -9,6 +9,7 @@ import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
 import { MiscInfo } from "@/services/basic-fetch/misc"
+import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -17,6 +18,7 @@ const Registration: NextPage = () => {
   // The "flow" represents a registration process and contains
   // information about the form we need to render (e.g. username + password)
   const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>()
+  const [changedFlow, setChangedFlow]: any = useState<RegistrationFlow>()
 
   // Get ?flow=... from the URL
   const { flow: flowId, return_to: returnTo } = router.query;
@@ -56,21 +58,11 @@ const Registration: NextPage = () => {
     if (initialFlow.ui.nodes[1].meta.label) {
       initialFlow.ui.nodes[1].meta.label.text = "Email address"
     }
-    if (initialFlow.ui.nodes[3].attributes.name === "traits.name.first") {
-      initialFlow.ui.nodes[3].attributes.required = true
-    }
-    if (initialFlow.ui.nodes[4].attributes.name === "traits.name.last") {
-      initialFlow.ui.nodes[4].attributes.required = true
-    }
-    setInitialFlow(initialFlow);
+    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
+    setChangedFlow(initialFlow);
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateRegistrationFlowBody) => {
-    await router
-      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-      // his data when she/he reloads the page.
-      .push(`/registration?flow=${initialFlow?.id}`, undefined, { shallow: true })
-
     ory
       .updateRegistrationFlow({
         flow: String(initialFlow?.id),
@@ -103,7 +95,7 @@ const Registration: NextPage = () => {
         <KernLogo />
         <div id="signup">
           <h2 className="title">{MiscInfo.isManaged ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
-          <Flow onSubmit={onSubmit} flow={initialFlow} />
+          <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>

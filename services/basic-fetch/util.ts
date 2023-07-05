@@ -13,6 +13,7 @@ export function jsonFetchWrapper(url: string, fetchType: FetchType, onResult?: (
         alertUser();
         return;
     }
+    // can't use submodule because of drone build issues. Copied instead
     if (!headers) headers = {};
     headers["Content-Type"] = "application/json";
 
@@ -31,8 +32,6 @@ export function jsonFetchWrapper(url: string, fetchType: FetchType, onResult?: (
     });
 
     if (onResult && !hasError) myFetch.then(result => onResult(result));
-
-
 }
 
 
