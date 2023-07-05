@@ -59,7 +59,7 @@ body {
     margin-top: 32px !important;
 }
 
-#submit {
+button[name="method"] {
     width: 100%;
     display: flex;
     justify-content: center;
