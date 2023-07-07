@@ -26,7 +26,6 @@ export function NodeInputSubmit<T>({
       </>) : (<> </>)}
 
       <Button
-        id="submit"
         name={attributes.name}
         value={attributes.value || ""}
         disabled={attributes.disabled || disabled}
