@@ -9,6 +9,7 @@ docker run --rm -d \
 --name refinery-entry \
 -p 7080:3000 \
 --mount type=bind,source="$(pwd)"/,target=/app \
+-v /app/node_modules \
 --network dev-setup_default \
 refinery-entry-dev
 
