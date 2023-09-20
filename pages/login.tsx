@@ -90,7 +90,12 @@ const Login: NextPage = () => {
           window.location.href = initialFlow?.return_to
           return
         }
-        router.push("/welcome")
+        if (MiscInfo.isManaged) {
+          router.push("/welcome")
+        } else {
+          router.push("/refinery/projects")
+        }
+
       })
       .then(() => { })
       .catch(handleFlowError(router, "login", setInitialFlow))
