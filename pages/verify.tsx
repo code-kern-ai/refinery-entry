@@ -88,10 +88,10 @@ const Verification: NextPage = () => {
         switch (err.response?.status) {
           case 400:
             // Status code 400 implies the form validation had an error
-            setInitialFlow(err.response?.data)
+            setInitialFlow(err.response?.data as VerificationFlow | undefined)
             return
           case 410:
-            const newFlowID = err.response.data.use_flow_id
+            const newFlowID = (err.response.data as any).use_flow_id
             router
               // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
               // their data when they reload the page.
