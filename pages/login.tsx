@@ -103,7 +103,7 @@ const Login: NextPage = () => {
         // If the previous handler did not catch the error it's most likely a form validation error
         if (err.response?.status === 400) {
           // Yup, it is!
-          setInitialFlow(err.response?.data)
+          setInitialFlow(err.response?.data as LoginFlow | undefined)
           return
         }
 
