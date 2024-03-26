@@ -94,7 +94,7 @@ const Registration: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="signup">
-          <h2 className="title">{MiscInfo.isManaged ? 'Start your 14-day free trial' : 'Sign up for a local account'}</h2>
+          <h2 className="title">{MiscInfo.isManaged ? 'Register account' : 'Sign up for a local account'}</h2>
           <Flow onSubmit={onSubmit} flow={changedFlow} />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>

@@ -123,8 +123,8 @@ const Login: NextPage = () => {
           {!MiscInfo.isDemo ? (
             <>{MiscInfo.isManaged ? (
               <p className="text-paragraph">Or
-                <a className="link" data-testid="cta-link" href="/auth/registration"> start your 14-day free trial</a>
-                - no credit card required!
+                <a className="link" data-testid="cta-link" href="/auth/registration"> Register account </a> -
+                no credit card required!
               </p>
             ) : (<>
               <p className="text-paragraph">You don&apos;t have an account yet?
