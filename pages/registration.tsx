@@ -56,20 +56,36 @@ const Registration: NextPage = () => {
   useEffect(() => {
     if (!initialFlow) return;
     if (initialFlow.ui.nodes[1].meta.label) {
-      initialFlow.ui.nodes[1].meta.label.text = "Email address"
+      //initialFlow.ui.nodes[1].meta.label.text = "Email address"
     }
     initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
     setChangedFlow(initialFlow);
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateRegistrationFlowBody) => {
+
+    await router
+      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
+      // his data when she/he reloads the page.
+      .push(`/registration?flow=${initialFlow?.id}`, undefined, { shallow: true })
     ory
       .updateRegistrationFlow({
         flow: String(initialFlow?.id),
-        updateRegistrationFlowBody: values,
+        updateRegistrationFlowBody: values
       })
       .then(async ({ data }) => {
         // If continue_with did not contain anything, we can just return to the home page.
+        console.log("THEN", data)
+        if (data.continue_with) {
+          for (const item of data.continue_with) {
+            switch (item.action) {
+              case "show_verification_ui":
+                await router.push("/verification?flow=" + item.flow.id)
+                return
+            }
+          }
+        }
+
         await router.push(initialFlow?.return_to || "/")
       })
       .catch(handleFlowError(router, "registration", setInitialFlow))
@@ -95,7 +111,8 @@ const Registration: NextPage = () => {
         <KernLogo />
         <div id="signup">
           <h2 className="title">{MiscInfo.isManaged ? 'Register account' : 'Sign up for a local account'}</h2>
-          <Flow onSubmit={onSubmit} flow={changedFlow} />
+          <Flow onSubmit={onSubmit} flow={changedFlow} only="oidc" />
+          <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>
