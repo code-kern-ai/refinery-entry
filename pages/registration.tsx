@@ -55,10 +55,10 @@ const Registration: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-    if (initialFlow.ui.nodes[1].meta.label) {
-      //initialFlow.ui.nodes[1].meta.label.text = "Email address"
-    }
+
     initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
+    const filteredNodes = initialFlow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
+    initialFlow.ui.nodes = filteredNodes;
     setChangedFlow(initialFlow);
   }, [initialFlow])
 
@@ -111,8 +111,13 @@ const Registration: NextPage = () => {
         <KernLogo />
         <div id="signup">
           <h2 className="title">{MiscInfo.isManaged ? 'Register account' : 'Sign up for a local account'}</h2>
-          <Flow onSubmit={onSubmit} flow={changedFlow} only="oidc" />
-          <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
+          <div>
+            <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
+            <div className="divider-outer"><span className="divider">Or</span></div>
+            <Flow onSubmit={onSubmit} flow={changedFlow} only="oidc" />
+
+          </div>
+
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>

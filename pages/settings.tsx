@@ -16,7 +16,7 @@ const Settings: NextPage = () => {
   const [changedFlow, setChangedFlow]: any = useState<SettingsFlow>()
   const [containsTotp, setContainsTotp] = useState<boolean>(false)
   const [containsBackupCodes, setContainsBackupCodes] = useState<boolean>(false)
-
+  const [isOidc, setIsOidc] = useState(false);
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
@@ -64,6 +64,10 @@ const Settings: NextPage = () => {
       setContainsBackupCodes(true);
     }
     setChangedFlow(initialFlow)
+    if (initialFlow.identity.metadata_public?.registration_scope?.provider_id != "kern") {
+      initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
+      setIsOidc(true);
+    }
   }, [initialFlow])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
@@ -109,17 +113,17 @@ const Settings: NextPage = () => {
               flow={changedFlow}
             />
           </div>
-
-          <div className="form-container">
-            <h3 className="subtitle">Change password</h3>
-            <Messages messages={changedFlow?.ui.messages} />
-            <Flow
-              hideGlobalMessages
-              onSubmit={onSubmit}
-              only="password"
-              flow={changedFlow}
-            />
-          </div>
+          {!isOidc ?
+            <div className="form-container">
+              <h3 className="subtitle">Change password</h3>
+              <Messages messages={changedFlow?.ui.messages} />
+              <Flow
+                hideGlobalMessages
+                onSubmit={onSubmit}
+                only="password"
+                flow={changedFlow}
+              />
+            </div> : null}
 
           {containsBackupCodes ? (<div className="form-container">
             <h3 className="subtitle">Manage 2FA backup recovery codes</h3>

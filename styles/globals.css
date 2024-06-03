@@ -80,6 +80,10 @@ button[name="method"] {
     background-color: #2f7241 !important;
 }
 
+button[name="provider"] {
+    background-color: rgb(69, 69, 69)!important;
+}
+
 button.button-sign-in:focus {
     outline-offset: 2px;
     outline-color: #5AB370;
@@ -144,6 +148,26 @@ button.button-sign-in:focus {
     font-weight: 400;
     color: #6B7280;
     margin-bottom: 20px;
+}
+
+.divider-outer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.8rem;
+}
+
+.divider-outer:before, .divider-outer:after {
+    content: "";
+    border-bottom: 1px solid  #D1D5DB;
+    flex: 1 0 auto;
+    height: .3rem;
+}
+
+.divider {
+    color: #a4a6a8;
+    margin: 0 1rem;
+    font-size: 0.8rem;
 }
 
 .subtitle {
