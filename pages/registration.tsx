@@ -9,7 +9,7 @@ import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
 import { MiscInfo } from "@/services/basic-fetch/misc"
-import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
+import { prepareNodes } from "@/util/helper-functions"
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -58,9 +58,7 @@ const Registration: NextPage = () => {
   useEffect(() => {
     if (!initialFlow) return;
 
-    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
-    const filteredNodes = initialFlow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
-    initialFlow.ui.nodes = filteredNodes;
+    initialFlow.ui.nodes = prepareNodes(initialFlow);
 
     if (initialFlow.ui.nodes.some((node: any) => node.group === "oidc")) {
       const oidcData = JSON.parse(JSON.stringify(initialFlow));
@@ -112,9 +110,11 @@ const Registration: NextPage = () => {
           <h2 className="title">{MiscInfo.isManaged ? 'Register account' : 'Sign up for a local account'}</h2>
           <div>
             <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
-            <div className="divider-outer"><span className="divider">Or</span></div>
-            <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
-
+            {oidcFlow ?
+              <>
+                <div className="divider-outer"><span className="divider">Or</span></div>
+                <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
+              </> : null}
           </div>
 
           <div className="link-container">

@@ -9,7 +9,7 @@ import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
+import { prepareNodes } from "@/util/helper-functions"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -52,17 +52,7 @@ const Settings: NextPage = () => {
   useEffect(() => {
     if (!initialFlow) return;
 
-    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(2, 3, initialFlow);
-    // prevent setting public meta data from settings
-    let filteredNodes = initialFlow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
-    // prevent setting E-mail if sso account (only hiding)
-    const providerId = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
-    if (["microsoft", "google"].includes(providerId)) {
-      const mailNode = filteredNodes.find((node: any) => node.attributes?.name == "traits.email");
-      mailNode.attributes.type = "hidden"
-    }
-
-    initialFlow.ui.nodes = filteredNodes;
+    initialFlow.ui.nodes = prepareNodes(initialFlow);
 
     const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
     const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
@@ -73,10 +63,13 @@ const Settings: NextPage = () => {
       setContainsBackupCodes(true);
     }
     setChangedFlow(initialFlow)
+
+    //prevent password change option display if sso
     if (initialFlow.identity.metadata_public?.registration_scope?.provider_id != "kern") {
       initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
       setIsOidc(true);
     }
+
   }, [initialFlow])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
