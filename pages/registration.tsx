@@ -85,17 +85,6 @@ const Registration: NextPage = () => {
         updateRegistrationFlowBody: values
       })
       .then(async ({ data }) => {
-        // If continue_with did not contain anything, we can just return to the home page.
-        if (data.continue_with) {
-          for (const item of data.continue_with) {
-            switch (item.action) {
-              case "show_verification_ui":
-                await router.push("/verify?flow=" + item.flow.id)
-                return
-            }
-          }
-        }
-
         await router.push(initialFlow?.return_to || "/")
       })
       .catch(handleFlowError(router, "registration", setInitialFlow))
