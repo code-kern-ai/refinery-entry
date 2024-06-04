@@ -70,10 +70,7 @@ const Verification: NextPage = () => {
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateVerificationFlowBody) => {
-    await router
-      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-      // their data when they reload the page.
-      .push(`/verify?flow=${initialFlow?.id}`, undefined, { shallow: true })
+
 
     ory
       .updateVerificationFlow({

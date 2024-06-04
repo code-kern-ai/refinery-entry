@@ -81,8 +81,18 @@ button[name="method"] {
 }
 
 button[name="provider"] {
-    background-color: rgb(69, 69, 69)!important;
+    background-color: white !important;
+    color: rgb(69, 69, 69) !important;
+    border: 1px rgb(209 213 219) solid !important;
 }
+
+button[name="provider"]:hover {
+    border-color: #5AB370 !important;
+    background-color: rgb(251, 251, 251) !important;
+    transition: all 0.1s ease-in-out;
+}
+
+
 
 button.button-sign-in:focus {
     outline-offset: 2px;
@@ -154,7 +164,8 @@ button.button-sign-in:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0.8rem;
+    margin: 0.75rem;
+    padding-top: 0.25rem;
 }
 
 .divider-outer:before, .divider-outer:after {

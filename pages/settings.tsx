@@ -51,10 +51,19 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-    if (initialFlow.ui.nodes[1].meta.label) {
-      initialFlow.ui.nodes[1].meta.label.text = "Email address";
-    }
+
     initialFlow.ui.nodes = prepareFirstLastNameAsRequired(2, 3, initialFlow);
+    // prevent setting public meta data from settings
+    let filteredNodes = initialFlow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
+    // prevent setting E-mail if sso account (only hiding)
+    const providerId = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
+    if (["microsoft", "google"].includes(providerId)) {
+      const mailNode = filteredNodes.find((node: any) => node.attributes?.name == "traits.email");
+      mailNode.attributes.type = "hidden"
+    }
+
+    initialFlow.ui.nodes = filteredNodes;
+
     const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
     const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
     if (checkIfTotp) {

@@ -17,8 +17,10 @@ const Registration: NextPage = () => {
 
   // The "flow" represents a registration process and contains
   // information about the form we need to render (e.g. username + password)
-  const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>()
-  const [changedFlow, setChangedFlow]: any = useState<RegistrationFlow>()
+  const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>();
+  const [changedFlow, setChangedFlow]: any = useState<RegistrationFlow>();
+  const [oidcFlow, setOidcFlow]: any = useState<RegistrationFlow>();
+
 
   // Get ?flow=... from the URL
   const { flow: flowId, return_to: returnTo } = router.query;
@@ -59,6 +61,15 @@ const Registration: NextPage = () => {
     initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
     const filteredNodes = initialFlow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
     initialFlow.ui.nodes = filteredNodes;
+
+    if (initialFlow.ui.nodes.some((node: any) => node.group === "oidc")) {
+      const oidcData = JSON.parse(JSON.stringify(initialFlow));
+      oidcData.ui.nodes = oidcData.ui.nodes.filter((node: any) => node.group == "oidc");
+      // prevent duplicate messages
+      oidcData.ui.messages = [];
+      setOidcFlow(oidcData);
+    }
+
     setChangedFlow(initialFlow);
   }, [initialFlow])
 
@@ -75,12 +86,11 @@ const Registration: NextPage = () => {
       })
       .then(async ({ data }) => {
         // If continue_with did not contain anything, we can just return to the home page.
-        console.log("THEN", data)
         if (data.continue_with) {
           for (const item of data.continue_with) {
             switch (item.action) {
               case "show_verification_ui":
-                await router.push("/verification?flow=" + item.flow.id)
+                await router.push("/verify?flow=" + item.flow.id)
                 return
             }
           }
@@ -114,7 +124,7 @@ const Registration: NextPage = () => {
           <div>
             <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
             <div className="divider-outer"><span className="divider">Or</span></div>
-            <Flow onSubmit={onSubmit} flow={changedFlow} only="oidc" />
+            <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
 
           </div>
 

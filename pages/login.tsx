@@ -19,6 +19,7 @@ const Login: NextPage = () => {
   const [changedFlow, setChangedFlow] = useState<LoginFlow>();
   const [oidcFlow, setOidcFlow] = useState<LoginFlow>();
   const [selectedRole, setSelectedRole] = useState<string | undefined>('engineer');
+  const [isAccLinkageRequested, setIsAccLinkageRequested] = useState(false);
 
   // Get ?flow=... from the URL
   const router = useRouter()
@@ -63,31 +64,41 @@ const Login: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
+    const linkageRequested = initialFlow.ui.messages?.some((message: any) => message.id === 4000007) && initialFlow.ui.messages?.some((message: any) => message.id === 1010016);
+    if (linkageRequested) {
+      initialFlow.ui.nodes = []
+      initialFlow.ui.messages = [{ id: 400002, type: "error", text: "An account with the same identifier exists already and can not be linked by social-sign-in." }]
+      setChangedFlow(initialFlow);
+      setIsAccLinkageRequested(linkageRequested);
+      return
+    }
+
     const flowData: any = Object.assign({}, initialFlow);
 
-    let emailNode = flowData.ui.nodes.find((node: any) => node.meta.label?.text == "E-Mail");
+    let emailNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "E-Mail");
     if (emailNode && MiscInfo.isDemo) {
       emailNode.attributes.value = getValueIdentifier(selectedRole);
     }
 
-
-    let passwordNode = flowData.ui.nodes.find((node: any) => node.meta.label?.text == "Password");
+    let passwordNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "Password");
     if (passwordNode && MiscInfo.isDemo) {
       passwordNode.attributes.value = getValuePassword(selectedRole);
     }
 
-    let submitNode = flowData.ui.nodes.find((node: any) => node.meta.label?.text == "Sign in");
-    if (submitNode.meta.label && MiscInfo.isDemo) {
+    let submitNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "Sign in");
+    if (submitNode && MiscInfo.isDemo) {
       submitNode.meta.label.text = "Proceed"
     }
+
 
     if (flowData.ui.nodes.some((node: any) => node.group === "oidc")) {
       const oidcData = JSON.parse(JSON.stringify(flowData));
       oidcData.ui.nodes = oidcData.ui.nodes.filter((node: any) => node.group == "oidc");
+      // prevent duplicate messages
+      oidcData.ui.messages = [];
       setOidcFlow(oidcData);
     }
     setChangedFlow(flowData);
-
   }, [initialFlow, selectedRole])
 
   const onSubmit = (values: UpdateLoginFlowBody) =>
@@ -148,8 +159,11 @@ const Login: NextPage = () => {
             {!MiscInfo.isDemo ? (
               <div>
                 <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
-                <div className="divider-outer"><span className="divider">Or</span></div>
-                <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
+                {oidcFlow ?
+                  <>
+                    <div className="divider-outer"><span className="divider">Or</span></div>
+                    <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
+                  </> : null}
               </div>) : (<>
                 <fieldset>
                   <span className="typography-h3">
@@ -172,7 +186,11 @@ const Login: NextPage = () => {
               </>)}
           </div>
           <div className="link-container">
-            {!MiscInfo.isDemo ? (<a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>) : (<></>)}
+            {!MiscInfo.isDemo ?
+              !isAccLinkageRequested ?
+                <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>
+                : <a className="link" data-testid="back-to-login" href="/auth/login">Go back to login</a>
+              : null}
           </div>
         </div>
       </div >
