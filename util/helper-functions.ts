@@ -37,12 +37,25 @@ export function refactorFlowWithMoreMessages(flow: any) {
     return flow;
 }
 
-export function prepareFirstLastNameAsRequired(firstNameIdx: number, lastNameIdx: number, initialFlow: any) {
-    if (initialFlow.ui.nodes[firstNameIdx].attributes.name === "traits.name.first") {
-        initialFlow.ui.nodes[firstNameIdx].attributes.required = true
+export function prepareNodes(flow: any) {
+
+    let firstNameNode = flow.ui.nodes.find((node: any) => node.attributes?.name === "traits.name.first");
+    if (firstNameNode) {
+        firstNameNode.attributes.required = true
     }
-    if (initialFlow.ui.nodes[lastNameIdx].attributes.name === "traits.name.last") {
-        initialFlow.ui.nodes[lastNameIdx].attributes.required = true
+
+    let lastNameNode = flow.ui.nodes.find((node: any) => node.attributes?.name === "traits.name.last");
+    if (lastNameNode) {
+        lastNameNode.attributes.required = true
     }
-    return initialFlow.ui.nodes;
+
+    let filteredNodes = flow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
+
+    const providerId = flow.identity?.metadata_public?.registration_scope?.provider_id;
+    if (["microsoft", "google"].includes(providerId)) {
+        const mailNode = filteredNodes.find((node: any) => node.attributes?.name == "traits.email");
+        mailNode.attributes.type = "hidden"
+    }
+
+    return filteredNodes;
 }

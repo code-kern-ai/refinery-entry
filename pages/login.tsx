@@ -15,9 +15,11 @@ import ory from "@/pkg/sdk"
 import { MiscInfo } from "@/services/basic-fetch/misc"
 
 const Login: NextPage = () => {
-  const [initialFlow, setInitialFlow] = useState<LoginFlow>()
-  const [changedFlow, setChangedFlow] = useState<LoginFlow>()
+  const [initialFlow, setInitialFlow] = useState<LoginFlow>();
+  const [changedFlow, setChangedFlow] = useState<LoginFlow>();
+  const [oidcFlow, setOidcFlow] = useState<LoginFlow>();
   const [selectedRole, setSelectedRole] = useState<string | undefined>('engineer');
+  const [isAccLinkageRequested, setIsAccLinkageRequested] = useState(false);
 
   // Get ?flow=... from the URL
   const router = useRouter()
@@ -62,20 +64,41 @@ const Login: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-    const data: any = { ...initialFlow };
-    if (data.ui.nodes[1].meta.label) {
-      data.ui.nodes[1].meta.label.text = "Email address"
-      if (MiscInfo.isDemo) {
-        data.ui.nodes[1].attributes.value = getValueIdentifier(selectedRole);
-      }
+    const linkageRequested = initialFlow.ui.messages?.some((message: any) => message.id === 4000007) && initialFlow.ui.messages?.some((message: any) => message.id === 1010016);
+    if (linkageRequested) {
+      initialFlow.ui.nodes = []
+      initialFlow.ui.messages = [{ id: 400002, type: "error", text: "An account with the same identifier exists already and can not be linked by social-sign-in." }]
+      setChangedFlow(initialFlow);
+      setIsAccLinkageRequested(linkageRequested);
+      return
     }
-    if (data.ui.nodes[2].meta.label && MiscInfo.isDemo) {
-      data.ui.nodes[2].attributes.value = getValuePassword(selectedRole);
+
+    const flowData: any = Object.assign({}, initialFlow);
+
+    let emailNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "E-Mail");
+    if (emailNode && MiscInfo.isDemo) {
+      emailNode.attributes.value = getValueIdentifier(selectedRole);
     }
-    if (data.ui.nodes[3].meta.label && MiscInfo.isDemo) {
-      data.ui.nodes[3].meta.label.text = "Proceed"
+
+    let passwordNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "Password");
+    if (passwordNode && MiscInfo.isDemo) {
+      passwordNode.attributes.value = getValuePassword(selectedRole);
     }
-    setChangedFlow(data);
+
+    let submitNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "Sign in");
+    if (submitNode && MiscInfo.isDemo) {
+      submitNode.meta.label.text = "Proceed"
+    }
+
+
+    if (flowData.ui.nodes.some((node: any) => node.group === "oidc")) {
+      const oidcData = JSON.parse(JSON.stringify(flowData));
+      oidcData.ui.nodes = oidcData.ui.nodes.filter((node: any) => node.group == "oidc");
+      // prevent duplicate messages
+      oidcData.ui.messages = [];
+      setOidcFlow(oidcData);
+    }
+    setChangedFlow(flowData);
   }, [initialFlow, selectedRole])
 
   const onSubmit = (values: UpdateLoginFlowBody) =>
@@ -133,29 +156,41 @@ const Login: NextPage = () => {
             </>)}</>
           ) : (<></>)}
           <div className="ui-container">
-            {!MiscInfo.isDemo ? (<Flow onSubmit={onSubmit} flow={changedFlow} />) : (<>
-              <fieldset>
-                <span className="typography-h3">
-                  Select role
-                  <span className="required-indicator">*</span>
-                  <select className="typography-h3 select" id="roles" value={selectedRole} onChange={(e: any) => { setSelectedRole(e.target.value); }}>
-                    <option value="engineer">Engineer</option>
-                    <option value="expert">Expert</option>
-                    <option value="annotator">Annotator</option>
-                  </select>
-                </span>
-              </fieldset>
-              <p className="text-description" id="description">
-                {selectedRole === 'engineer' ? 'Administers the project and works on programmatic tasks such as labeling automation or filter settings.' : selectedRole === 'expert' ? 'Working on reference manual labels, which can be used by the engineering team to estimate the data quality.' : 'Working on manual labels as if they were heuristics. They can be switched on/off by the engineering team, so that the engineers can in - or exclude them during weak supervision.'}
-              </p>
-              <p className="text-description" id="sub-description">
-                {selectedRole === 'engineer' ? 'They have access to all features of the application, including the Python SDK.' : selectedRole === 'expert' ? 'They have access to the labeling view only.' : 'They have access to a task-minimized labeling view only. Engineers can revoke their access to the labeling view.'}
-              </p>
-              <DemoFlow onSubmit={onSubmit} flow={changedFlow} />
-            </>)}
+            {!MiscInfo.isDemo ? (
+              <div>
+                <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
+                {oidcFlow ?
+                  <>
+                    <div className="divider-outer"><span className="divider">Or</span></div>
+                    <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
+                  </> : null}
+              </div>) : (<>
+                <fieldset>
+                  <span className="typography-h3">
+                    Select role
+                    <span className="required-indicator">*</span>
+                    <select className="typography-h3 select" id="roles" value={selectedRole} onChange={(e: any) => { setSelectedRole(e.target.value); }}>
+                      <option value="engineer">Engineer</option>
+                      <option value="expert">Expert</option>
+                      <option value="annotator">Annotator</option>
+                    </select>
+                  </span>
+                </fieldset>
+                <p className="text-description" id="description">
+                  {selectedRole === 'engineer' ? 'Administers the project and works on programmatic tasks such as labeling automation or filter settings.' : selectedRole === 'expert' ? 'Working on reference manual labels, which can be used by the engineering team to estimate the data quality.' : 'Working on manual labels as if they were heuristics. They can be switched on/off by the engineering team, so that the engineers can in - or exclude them during weak supervision.'}
+                </p>
+                <p className="text-description" id="sub-description">
+                  {selectedRole === 'engineer' ? 'They have access to all features of the application, including the Python SDK.' : selectedRole === 'expert' ? 'They have access to the labeling view only.' : 'They have access to a task-minimized labeling view only. Engineers can revoke their access to the labeling view.'}
+                </p>
+                <DemoFlow onSubmit={onSubmit} flow={changedFlow} />
+              </>)}
           </div>
           <div className="link-container">
-            {!MiscInfo.isDemo ? (<a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>) : (<></>)}
+            {!MiscInfo.isDemo ?
+              !isAccLinkageRequested ?
+                <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>
+                : <a className="link" data-testid="back-to-login" href="/auth/login">Go back to login</a>
+              : null}
           </div>
         </div>
       </div >

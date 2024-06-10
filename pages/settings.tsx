@@ -9,14 +9,14 @@ import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
-import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
+import { prepareNodes } from "@/util/helper-functions"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
   const [changedFlow, setChangedFlow]: any = useState<SettingsFlow>()
   const [containsTotp, setContainsTotp] = useState<boolean>(false)
   const [containsBackupCodes, setContainsBackupCodes] = useState<boolean>(false)
-
+  const [isOidc, setIsOidc] = useState(false);
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
@@ -51,10 +51,7 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-    if (initialFlow.ui.nodes[1].meta.label) {
-      initialFlow.ui.nodes[1].meta.label.text = "Email address";
-    }
-    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(2, 3, initialFlow);
+    initialFlow.ui.nodes = prepareNodes(initialFlow);
     const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
     const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
     if (checkIfTotp) {
@@ -64,6 +61,13 @@ const Settings: NextPage = () => {
       setContainsBackupCodes(true);
     }
     setChangedFlow(initialFlow)
+
+    //prevent password change option display if sso
+    if (initialFlow.identity.metadata_public?.registration_scope?.provider_id != "kern.ai") {
+      initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
+      setIsOidc(true);
+    }
+
   }, [initialFlow])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
@@ -109,17 +113,17 @@ const Settings: NextPage = () => {
               flow={changedFlow}
             />
           </div>
-
-          <div className="form-container">
-            <h3 className="subtitle">Change password</h3>
-            <Messages messages={changedFlow?.ui.messages} />
-            <Flow
-              hideGlobalMessages
-              onSubmit={onSubmit}
-              only="password"
-              flow={changedFlow}
-            />
-          </div>
+          {!isOidc ?
+            <div className="form-container">
+              <h3 className="subtitle">Change password</h3>
+              <Messages messages={changedFlow?.ui.messages} />
+              <Flow
+                hideGlobalMessages
+                onSubmit={onSubmit}
+                only="password"
+                flow={changedFlow}
+              />
+            </div> : null}
 
           {containsBackupCodes ? (<div className="form-container">
             <h3 className="subtitle">Manage 2FA backup recovery codes</h3>

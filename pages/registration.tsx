@@ -9,7 +9,7 @@ import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
 import { MiscInfo } from "@/services/basic-fetch/misc"
-import { prepareFirstLastNameAsRequired } from "@/util/helper-functions"
+import { prepareNodes } from "@/util/helper-functions"
 
 // Renders the registration page
 const Registration: NextPage = () => {
@@ -17,8 +17,10 @@ const Registration: NextPage = () => {
 
   // The "flow" represents a registration process and contains
   // information about the form we need to render (e.g. username + password)
-  const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>()
-  const [changedFlow, setChangedFlow]: any = useState<RegistrationFlow>()
+  const [initialFlow, setInitialFlow]: any = useState<RegistrationFlow>();
+  const [changedFlow, setChangedFlow]: any = useState<RegistrationFlow>();
+  const [oidcFlow, setOidcFlow]: any = useState<RegistrationFlow>();
+
 
   // Get ?flow=... from the URL
   const { flow: flowId, return_to: returnTo } = router.query;
@@ -55,21 +57,32 @@ const Registration: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-    if (initialFlow.ui.nodes[1].meta.label) {
-      initialFlow.ui.nodes[1].meta.label.text = "Email address"
+
+    initialFlow.ui.nodes = prepareNodes(initialFlow);
+
+    if (initialFlow.ui.nodes.some((node: any) => node.group === "oidc")) {
+      const oidcData = JSON.parse(JSON.stringify(initialFlow));
+      oidcData.ui.nodes = oidcData.ui.nodes.filter((node: any) => node.group == "oidc");
+      // prevent duplicate messages
+      oidcData.ui.messages = [];
+      setOidcFlow(oidcData);
     }
-    initialFlow.ui.nodes = prepareFirstLastNameAsRequired(3, 4, initialFlow);
+
     setChangedFlow(initialFlow);
   }, [initialFlow])
 
   const onSubmit = async (values: UpdateRegistrationFlowBody) => {
+
+    await router
+      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
+      // his data when she/he reloads the page.
+      .push(`/registration?flow=${initialFlow?.id}`, undefined, { shallow: true })
     ory
       .updateRegistrationFlow({
         flow: String(initialFlow?.id),
-        updateRegistrationFlowBody: values,
+        updateRegistrationFlowBody: values
       })
       .then(async ({ data }) => {
-        // If continue_with did not contain anything, we can just return to the home page.
         await router.push(initialFlow?.return_to || "/")
       })
       .catch(handleFlowError(router, "registration", setInitialFlow))
@@ -95,7 +108,15 @@ const Registration: NextPage = () => {
         <KernLogo />
         <div id="signup">
           <h2 className="title">{MiscInfo.isManaged ? 'Register account' : 'Sign up for a local account'}</h2>
-          <Flow onSubmit={onSubmit} flow={changedFlow} />
+          <div>
+            <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
+            {oidcFlow ?
+              <>
+                <div className="divider-outer"><span className="divider">Or</span></div>
+                <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
+              </> : null}
+          </div>
+
           <div className="link-container">
             <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
           </div>
