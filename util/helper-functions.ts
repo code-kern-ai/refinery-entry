@@ -51,7 +51,6 @@ export function prepareNodes(flow: any) {
 
     let filteredNodes = flow.ui.nodes.filter((node: any) => !node.attributes?.name.startsWith("metadata"));
 
-
     const providerId = flow.identity?.metadata_public?.registration_scope?.provider_id;
     if (["microsoft", "google"].includes(providerId)) {
         const mailNode = filteredNodes.find((node: any) => node.attributes?.name == "traits.email");

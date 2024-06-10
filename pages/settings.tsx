@@ -51,9 +51,7 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     if (!initialFlow) return;
-
     initialFlow.ui.nodes = prepareNodes(initialFlow);
-
     const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
     const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
     if (checkIfTotp) {
@@ -65,7 +63,7 @@ const Settings: NextPage = () => {
     setChangedFlow(initialFlow)
 
     //prevent password change option display if sso
-    if (initialFlow.identity.metadata_public?.registration_scope?.provider_id != "kern") {
+    if (initialFlow.identity.metadata_public?.registration_scope?.provider_id != "kern.ai") {
       initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
       setIsOidc(true);
     }

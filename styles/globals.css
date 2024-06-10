@@ -92,8 +92,6 @@ button[name="provider"]:hover {
     transition: all 0.1s ease-in-out;
 }
 
-
-
 button.button-sign-in:focus {
     outline-offset: 2px;
     outline-color: #5AB370;
