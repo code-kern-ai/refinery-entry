@@ -20,7 +20,7 @@ const Login: NextPage = () => {
   const [oidcFlow, setOidcFlow] = useState<LoginFlow>();
   const [selectedRole, setSelectedRole] = useState<string | undefined>('engineer');
   const [isAccLinkageRequested, setIsAccLinkageRequested] = useState(false);
-
+  const [totpFlow, setTotpFlow] = useState<LoginFlow>();
   // Get ?flow=... from the URL
   const router = useRouter()
   const {
@@ -90,6 +90,13 @@ const Login: NextPage = () => {
       submitNode.meta.label.text = "Proceed"
     }
 
+    if (initialFlow.ui.nodes.some((node: any) => node.group === "totp")) {
+      const totcData = JSON.parse(JSON.stringify(flowData));
+      totcData.ui.nodes = totcData.ui.nodes.filter((node: any) => node.group == "totp" || node.group == "default");
+      // prevent duplicate messages
+      totcData.ui.messages = [];
+      setTotpFlow(totcData);
+    }
 
     if (flowData.ui.nodes.some((node: any) => node.group === "oidc")) {
       const oidcData = JSON.parse(JSON.stringify(flowData));
@@ -164,7 +171,12 @@ const Login: NextPage = () => {
                     <div className="divider-outer"><span className="divider">Or</span></div>
                     <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
                   </> : null}
+                {totpFlow ?
+                  <>
+                    <Flow onSubmit={onSubmit} flow={totpFlow} only="totp" />
+                  </> : null}
               </div>) : (<>
+
                 <fieldset>
                   <span className="typography-h3">
                     Select role

@@ -41,7 +41,7 @@ export function handleGetFlowError<S>(
           "A security violation was detected, please fill out the form again.",
         )
         resetFlow(undefined)
-        await router.push("/welcome" + flowType)
+        await router.push("/auth/" + flowType)
         return
       case "security_identity_mismatch":
         // The requested item was intended for someone else. Let's request a new flow...

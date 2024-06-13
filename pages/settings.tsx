@@ -63,7 +63,7 @@ const Settings: NextPage = () => {
     setChangedFlow(initialFlow)
 
     //prevent password change option display if sso
-    if (initialFlow.identity.metadata_public?.registration_scope?.provider_id != "kern.ai") {
+    if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
       initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
       setIsOidc(true);
     }
