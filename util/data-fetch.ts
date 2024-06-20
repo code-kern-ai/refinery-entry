@@ -1,4 +1,4 @@
-import { FetchType, jsonFetchWrapper } from "@/services/basic-fetch/util";
+import { FetchType, jsonFetchWrapper } from "@/submodules/javascript-functions/basic-fetch";
 
 export function getIsManaged(onResult: (result: any) => void) {
     const url = `/is_managed`;
