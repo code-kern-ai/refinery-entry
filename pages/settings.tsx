@@ -3,13 +3,20 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 import { prepareNodes } from "@/util/helper-functions"
+import { WebSocketsService } from "@/submodules/react-components/hooks/web-socket/WebSocketsService"
+import { getAllActiveAdminMessages, getUserInfoExtended } from "@/util/data-fetch"
+import { useWebsocket } from "@/submodules/react-components/hooks/web-socket/useWebsocket"
+import { Application, CurrentPage } from "@/submodules/react-components/hooks/web-socket/constants"
+import { AdminMessage } from "@/submodules/react-components/types/admin-messages"
+import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
+import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -17,9 +24,40 @@ const Settings: NextPage = () => {
   const [containsTotp, setContainsTotp] = useState<boolean>(false)
   const [containsBackupCodes, setContainsBackupCodes] = useState<boolean>(false)
   const [isOidc, setIsOidc] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [activeAdminMessages, setActiveAdminMessages] = useState<AdminMessage[]>([]);
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
+
+  useEffect(() => {
+    getUserInfoExtended((res) => {
+      setUser(res['data']['userInfo']);
+      if (res) {
+        if (res['data']?.["userInfo"]?.organizationId) {
+          if (WebSocketsService.getConnectionOpened()) return;
+          WebSocketsService.setConnectionOpened(true);
+          WebSocketsService.initWsNotifications();
+        }
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    refetchAdminMessagesAndProcess();
+  }, []);
+
+  const handleWebsocketNotification = useCallback((msgParts: string[]) => {
+    if (msgParts[1] == 'admin_message') {
+      refetchAdminMessagesAndProcess();
+    }
+  }, []);
+
+  function refetchAdminMessagesAndProcess() {
+    getAllActiveAdminMessages((res) => setActiveAdminMessages(postProcessAdminMessages(res["data"]["allActiveAdminMessages"])));
+  }
+
+  useWebsocket(user?.organizationId, Application.ENTRY, CurrentPage.ENTRY_LAYOUT, handleWebsocketNotification)
 
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
@@ -162,6 +200,9 @@ const Settings: NextPage = () => {
       </div>
       <div className="img-container">
       </div>
+      <AdminMessages
+        adminMessages={activeAdminMessages}
+        setActiveAdminMessages={setActiveAdminMessages} />
     </>
   )
 }

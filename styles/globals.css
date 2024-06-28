@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *,
 ::before,
 ::after {
@@ -166,9 +170,10 @@ button.button-sign-in:focus {
     padding-top: 0.25rem;
 }
 
-.divider-outer:before, .divider-outer:after {
+.divider-outer:before,
+.divider-outer:after {
     content: "";
-    border-bottom: 1px solid  #D1D5DB;
+    border-bottom: 1px solid #D1D5DB;
     flex: 1 0 auto;
     height: .3rem;
 }

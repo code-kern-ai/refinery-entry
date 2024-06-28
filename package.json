@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.18",
+    "@nextui-org/react": "^1.0.0-beta.13",
     "@ory/client": "^1.1.24",
     "@ory/integrations": "^1.1.0",
     "@ory/kratos-client": "^0.11.1",
     "@ory/themes": "^0.0.101",
+    "@tabler/icons-react": "^3.2.0",
+    "@tailwindcss/forms": "^0.5.3",
     "@types/node": "18.15.12",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
@@ -23,7 +27,9 @@
     "next": "^12.2.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-i18next": "^14.1.2",
     "react-toastify": "^9.1.2",
+    "rxjs": "^7.8.1",
     "styled-components": "^5.3.9",
     "typescript": "5.0.4"
   },
