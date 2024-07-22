@@ -1,5 +1,5 @@
 import { UserManagerWrapper } from "@/util/UserManaged"
-import "../styles/globals.css"
+import "../styles/tailwind.css"
 import '@/submodules/tailwind-config/global.css';
 import { theme, globalStyles, ThemeProps } from "@ory/themes"
 import type { AppProps } from "next/app"
