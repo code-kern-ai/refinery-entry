@@ -61,7 +61,8 @@ body {
     margin-top: 32px !important;
 }
 
-button[name="method"] {
+button[name="method"],
+button[name="lookup_secret_regenerate"] {
     width: 100%;
     display: flex;
     justify-content: center;
