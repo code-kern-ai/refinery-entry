@@ -121,7 +121,7 @@ const Login: NextPage = () => {
           return
         }
         if (MiscInfo.isManaged) {
-          router.push("/welcome")
+          router.push("/cognition")
         } else {
           router.push("/refinery/projects")
         }
