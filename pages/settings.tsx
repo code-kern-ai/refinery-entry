@@ -194,7 +194,7 @@ const Settings: NextPage = () => {
           </div>) : (<> </>)}
 
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/welcome">Back</a>
+            <a className="link" data-testid="forgot-password" href="/cognition">Back</a>
           </div>
         </div>
       </div>
