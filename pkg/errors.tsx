@@ -3,6 +3,16 @@ import { NextRouter } from "next/router"
 import { Dispatch, SetStateAction } from "react"
 import { toast } from "react-toastify"
 
+
+function handleAal2Error(jsonResponse: any, router: NextRouter,) {
+  if (jsonResponse.error?.id === "session_aal2_required") {
+    window.location.href = "/auth/login?aal=aal2"
+  }
+  else router.push("/cognition")
+
+}
+
+
 // A small function to help us deal with errors coming from fetching a flow.
 export function handleGetFlowError<S>(
   router: NextRouter,
@@ -16,6 +26,10 @@ export function handleGetFlowError<S>(
         window.location.href = (err.response?.data as any).redirect_browser_to
         return
       case "session_already_available":
+        await fetch('/.ory/kratos/public/sessions/whoami')
+          .then(response => response.json())
+          .then((jsonResponse) => handleAal2Error(jsonResponse, router))
+          .catch(() => { router.push("/cognition") });
         // User is already signed in, let's redirect them home!
         await router.push("/cognition")
         return
