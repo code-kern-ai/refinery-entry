@@ -8,7 +8,6 @@ import { KernLogo } from "@/pkg/ui/Icons"
 import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
 import { Flow } from "@/pkg"
-import { MiscInfo } from "@/services/basic-fetch/misc"
 import { prepareNodes } from "@/util/helper-functions"
 
 // Renders the registration page
@@ -107,7 +106,7 @@ const Registration: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="signup">
-          <h2 className="title">{MiscInfo.isManaged ? 'Register account' : 'Sign up for a local account'}</h2>
+          <h2 className="title">Register account</h2>
           <div>
             <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
             {oidcFlow ?

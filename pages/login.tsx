@@ -12,7 +12,6 @@ import { KernLogo } from "@/pkg/ui/Icons"
 import { DemoFlow } from "@/pkg/ui/DemoFlow"
 import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 import ory from "@/pkg/sdk"
-import { MiscInfo } from "@/services/basic-fetch/misc"
 
 const Login: NextPage = () => {
   const [initialFlow, setInitialFlow] = useState<LoginFlow>();
@@ -75,21 +74,6 @@ const Login: NextPage = () => {
 
     const flowData: any = Object.assign({}, initialFlow);
 
-    let emailNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "E-Mail");
-    if (emailNode && MiscInfo.isDemo) {
-      emailNode.attributes.value = getValueIdentifier(selectedRole);
-    }
-
-    let passwordNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "Password");
-    if (passwordNode && MiscInfo.isDemo) {
-      passwordNode.attributes.value = getValuePassword(selectedRole);
-    }
-
-    let submitNode = flowData.ui.nodes.find((node: any) => node.meta?.label?.text == "Sign in");
-    if (submitNode && MiscInfo.isDemo) {
-      submitNode.meta.label.text = "Proceed"
-    }
-
     if (initialFlow.ui.nodes.some((node: any) => node.group === "totp")) {
       const totcData = JSON.parse(JSON.stringify(flowData));
       totcData.ui.nodes = totcData.ui.nodes.filter((node: any) => node.group == "totp" || node.group == "default");
@@ -120,11 +104,7 @@ const Login: NextPage = () => {
           window.location.href = initialFlow?.return_to
           return
         }
-        if (MiscInfo.isManaged) {
-          router.push("/cognition")
-        } else {
-          router.push("/refinery/projects")
-        }
+        router.push("/cognition")
 
       })
       .then(() => { })
@@ -149,60 +129,31 @@ const Login: NextPage = () => {
       <div className="app-container">
         <KernLogo />
         <div id="login">
-          <h2 className="title">{MiscInfo.isDemo ? 'Proceed with your selected role' : 'Sign in to your account'}</h2>
-          {!MiscInfo.isDemo ? (
-            <>{MiscInfo.isManaged ? (
-              <p className="text-paragraph">Or
-                <a className="link" data-testid="cta-link" href="/auth/registration"> Register account </a> -
-                no credit card required!
-              </p>
-            ) : (<>
-              <p className="text-paragraph">You don&apos;t have an account yet?
-                <a className="link" data-testid="cta-link" href="/auth/registration"> Sign up here (local)</a>
-              </p>
-            </>)}</>
-          ) : (<></>)}
+          <h2 className="title">Sign in to your account</h2>
+          <p className="text-paragraph">Or
+            <a className="link" data-testid="cta-link" href="/auth/registration"> Register account </a> -
+            no credit card required!
+          </p>
           <div className="ui-container">
-            {!MiscInfo.isDemo ? (
-              <div>
-                <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
-                {oidcFlow ?
-                  <>
-                    <div className="divider-outer"><span className="divider">Or</span></div>
-                    <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
-                  </> : null}
-                {totpFlow ?
-                  <>
-                    <Flow onSubmit={onSubmit} flow={totpFlow} only="totp" />
-                  </> : null}
-              </div>) : (<>
-
-                <fieldset>
-                  <span className="typography-h3">
-                    Select role
-                    <span className="required-indicator">*</span>
-                    <select className="typography-h3 select" id="roles" value={selectedRole} onChange={(e: any) => { setSelectedRole(e.target.value); }}>
-                      <option value="engineer">Engineer</option>
-                      <option value="expert">Expert</option>
-                      <option value="annotator">Annotator</option>
-                    </select>
-                  </span>
-                </fieldset>
-                <p className="text-description" id="description">
-                  {selectedRole === 'engineer' ? 'Administers the project and works on programmatic tasks such as labeling automation or filter settings.' : selectedRole === 'expert' ? 'Working on reference manual labels, which can be used by the engineering team to estimate the data quality.' : 'Working on manual labels as if they were heuristics. They can be switched on/off by the engineering team, so that the engineers can in - or exclude them during weak supervision.'}
-                </p>
-                <p className="text-description" id="sub-description">
-                  {selectedRole === 'engineer' ? 'They have access to all features of the application, including the Python SDK.' : selectedRole === 'expert' ? 'They have access to the labeling view only.' : 'They have access to a task-minimized labeling view only. Engineers can revoke their access to the labeling view.'}
-                </p>
-                <DemoFlow onSubmit={onSubmit} flow={changedFlow} />
-              </>)}
+            <div>
+              <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
+              {oidcFlow ?
+                <>
+                  <div className="divider-outer"><span className="divider">Or</span></div>
+                  <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
+                </> : null}
+              {totpFlow ?
+                <>
+                  <Flow onSubmit={onSubmit} flow={totpFlow} only="totp" />
+                </> : null}
+            </div>
           </div>
           <div className="link-container">
-            {!MiscInfo.isDemo ?
+            {
               !isAccLinkageRequested ?
                 <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>
                 : <a className="link" data-testid="back-to-login" href="/auth/login">Go back to login</a>
-              : null}
+            }
           </div>
         </div>
       </div >

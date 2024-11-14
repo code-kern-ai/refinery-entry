@@ -1,4 +1,3 @@
-import { UserManagerWrapper } from "@/util/UserManaged"
 import "../styles/tailwind.css"
 import '@/submodules/tailwind-config/global.css';
 import { theme, globalStyles, ThemeProps } from "@ory/themes"
@@ -24,9 +23,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <div data-testid="app-react">
         <ThemeProvider theme={theme}>
           <GlobalStyle />
-          <UserManagerWrapper>
-            <Component {...pageProps} />
-          </UserManagerWrapper>
+          <Component {...pageProps} />
           <ToastContainer />
         </ThemeProvider>
       </div>
