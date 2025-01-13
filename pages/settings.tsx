@@ -32,9 +32,9 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     getUserInfoExtended((res) => {
-      setUser(res['data']['userInfo']);
+      setUser(res);
       if (res) {
-        if (res['data']?.["userInfo"]?.organizationId) {
+        if (res?.organizationId) {
           if (WebSocketsService.getConnectionOpened()) return;
           WebSocketsService.setConnectionOpened(true);
           WebSocketsService.initWsNotifications();
@@ -54,7 +54,7 @@ const Settings: NextPage = () => {
   }, []);
 
   function refetchAdminMessagesAndProcess() {
-    getAllActiveAdminMessages((res) => setActiveAdminMessages(postProcessAdminMessages(res["data"]["allActiveAdminMessages"])));
+    getAllActiveAdminMessages((res) => setActiveAdminMessages(postProcessAdminMessages(res)));
   }
 
   useWebsocket(user?.organizationId, Application.ENTRY, CurrentPage.ENTRY_LAYOUT, handleWebsocketNotification)
