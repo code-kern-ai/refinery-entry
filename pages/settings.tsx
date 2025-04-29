@@ -153,8 +153,7 @@ const Settings: NextPage = () => {
           </div>
           {!isOidc ?
             <div className="form-container">
-              <h3 className="subtitle">Change password</h3>
-              <Messages messages={changedFlow?.ui.messages} />
+              <h3 className="subtitle">{flowId ? 'Set' : 'Change'} password</h3>
               <Flow
                 hideGlobalMessages
                 onSubmit={onSubmit}
@@ -166,7 +165,6 @@ const Settings: NextPage = () => {
           {containsBackupCodes ? (<div className="form-container">
             <h3 className="subtitle">Manage 2FA backup recovery codes</h3>
             <p>Recovery codes can be used in panic situations where you have lost access to your 2FA device.</p>
-            <Messages messages={changedFlow?.ui.messages} />
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -184,7 +182,6 @@ const Settings: NextPage = () => {
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
                   target="_blank">Android</a>).
             </p>
-            <Messages messages={changedFlow?.ui.messages} />
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
