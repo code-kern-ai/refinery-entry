@@ -26,6 +26,8 @@ const Settings: NextPage = () => {
   const [isOidc, setIsOidc] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [activeAdminMessages, setActiveAdminMessages] = useState<AdminMessage[]>([]);
+  const [isOidcInvitation, setIsOidcInvitation] = useState(false);
+  const [backButtonDisabled, setBackButtonDisabled] = useState(false);
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
@@ -104,9 +106,39 @@ const Settings: NextPage = () => {
     if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
       initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
       setIsOidc(true);
+      if (initialFlow.identity.metadata_public?.registration_scope?.invitation_sso) {
+        setIsOidcInvitation(true);
+      }
+      const provider = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
+      if (provider === "google") {
+        console.log(document.querySelector('button[value="Microsoft"]'))
+        document.querySelector('button[value="Microsoft"]')?.setAttribute("class", "hidden");
+      } else if (provider === "microsoft") {
+        document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
+      }
     }
+  }, [initialFlow, changedFlow])
 
-  }, [initialFlow])
+  useEffect(() => {
+    if (!changedFlow || !initialFlow) return;
+    const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
+    const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
+    if (isOidc && isOidcInvitation) {
+      if (firstNameButtonVal === "" || lastNameButtonVal === "") {
+        setBackButtonDisabled(true);
+      } else {
+        setBackButtonDisabled(false);
+      }
+    } else {
+      const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
+      const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+      if (firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "") {
+        setBackButtonDisabled(true);
+      } else {
+        setBackButtonDisabled(false);
+      }
+    }
+  }, [isOidc, isOidcInvitation, initialFlow, changedFlow]);
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
     ory
@@ -190,8 +222,19 @@ const Settings: NextPage = () => {
             />
           </div>) : (<> </>)}
 
+          {isOidc && isOidcInvitation ? (<div className="form-container">
+            <Flow
+              hideGlobalMessages
+              onSubmit={onSubmit}
+              only="oidc"
+              flow={changedFlow}
+            />
+          </div>) : (<> </>)}
+
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/cognition">Back</a>
+            <button className="link disabled:opacity-50 disabled:cursor-not-allowed" data-testid="forgot-password" disabled={backButtonDisabled} onClick={() => {
+              router.push("/cognition")
+            }}>Back</button>
           </div>
         </div>
       </div>
