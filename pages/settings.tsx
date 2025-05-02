@@ -111,7 +111,6 @@ const Settings: NextPage = () => {
       }
       const provider = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
       if (provider === "google") {
-        console.log(document.querySelector('button[value="Microsoft"]'))
         document.querySelector('button[value="Microsoft"]')?.setAttribute("class", "hidden");
       } else if (provider === "microsoft") {
         document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
