@@ -104,19 +104,21 @@ const Settings: NextPage = () => {
     setChangedFlow(initialFlow)
 
     //prevent password change option display if sso
-    if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
-      initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
-      setIsOidc(true);
-      if (initialFlow.identity.metadata_public?.registration_scope?.invitation_sso) {
-        setIsOidcInvitation(true);
+    requestAnimationFrame(() => {
+      if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
+        initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
+        setIsOidc(true);
+        if (initialFlow.identity.metadata_public?.registration_scope?.invitation_sso) {
+          setIsOidcInvitation(true);
+        }
+        const provider = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
+        if (provider === "google") {
+          document.querySelector('button[value="Microsoft"]')?.setAttribute("class", "hidden");
+        } else if (provider === "microsoft") {
+          document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
+        }
       }
-      const provider = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
-      if (provider === "google") {
-        document.querySelector('button[value="Microsoft"]')?.setAttribute("class", "hidden");
-      } else if (provider === "microsoft") {
-        document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
-      }
-    }
+    });
   }, [initialFlow])
 
   useEffect(() => {
