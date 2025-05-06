@@ -28,6 +28,7 @@ const Settings: NextPage = () => {
   const [activeAdminMessages, setActiveAdminMessages] = useState<AdminMessage[]>([]);
   const [isOidcInvitation, setIsOidcInvitation] = useState(false);
   const [backButtonDisabled, setBackButtonDisabled] = useState(false);
+  const [messages, setMessages] = useState<any>(null);
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
@@ -116,7 +117,7 @@ const Settings: NextPage = () => {
         document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
       }
     }
-  }, [initialFlow, changedFlow])
+  }, [initialFlow])
 
   useEffect(() => {
     if (!changedFlow || !initialFlow) return;
@@ -138,6 +139,13 @@ const Settings: NextPage = () => {
       }
     }
   }, [isOidc, isOidcInvitation, initialFlow, changedFlow]);
+
+  useEffect(() => {
+    if (!changedFlow) return;
+    if (changedFlow.ui.messages) {
+      setMessages(changedFlow.ui.messages);
+    }
+  }, [changedFlow])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
     ory
@@ -173,8 +181,8 @@ const Settings: NextPage = () => {
         <div id="settings">
           <h2 className="title">Profile management and security settings</h2>
           <div className="form-container">
+            <Messages messages={messages} />
             <h3 className="subtitle">Profile Settings</h3>
-            <Messages messages={changedFlow?.ui.messages} />
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
