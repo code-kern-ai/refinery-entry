@@ -1,3 +1,7 @@
+const customMessageOverrides = {
+    1060001: "Welcome to the app! You have successfully registered. Set your first, last name and password to continue.",
+};
+
 export function getValueIdentifier(selectedRole: any) {
     let value = '';
     if (selectedRole === 'engineer') {
@@ -58,4 +62,8 @@ export function prepareNodes(flow: any) {
     }
 
     return filteredNodes;
+}
+
+export function displayMessage(msg: any): string {
+    return customMessageOverrides[msg.id] || msg.text;
 }

@@ -26,6 +26,9 @@ const Settings: NextPage = () => {
   const [isOidc, setIsOidc] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [activeAdminMessages, setActiveAdminMessages] = useState<AdminMessage[]>([]);
+  const [isOidcInvitation, setIsOidcInvitation] = useState(false);
+  const [backButtonDisabled, setBackButtonDisabled] = useState(false);
+  const [messages, setMessages] = useState<any>(null);
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
@@ -101,12 +104,50 @@ const Settings: NextPage = () => {
     setChangedFlow(initialFlow)
 
     //prevent password change option display if sso
-    if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
-      initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
-      setIsOidc(true);
-    }
-
+    requestAnimationFrame(() => {
+      if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
+        initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
+        setIsOidc(true);
+        if (initialFlow.identity.metadata_public?.registration_scope?.invitation_sso) {
+          setIsOidcInvitation(true);
+        }
+        const provider = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
+        if (provider === "google") {
+          document.querySelector('button[value="Microsoft"]')?.setAttribute("class", "hidden");
+        } else if (provider === "microsoft") {
+          document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
+        }
+      }
+    });
   }, [initialFlow])
+
+  useEffect(() => {
+    if (!changedFlow || !initialFlow) return;
+    const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
+    const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
+    if (isOidc && isOidcInvitation) {
+      if (firstNameButtonVal === "" || lastNameButtonVal === "") {
+        setBackButtonDisabled(true);
+      } else {
+        setBackButtonDisabled(false);
+      }
+    } else {
+      const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
+      const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+      if (firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "") {
+        setBackButtonDisabled(true);
+      } else {
+        setBackButtonDisabled(false);
+      }
+    }
+  }, [isOidc, isOidcInvitation, initialFlow, changedFlow]);
+
+  useEffect(() => {
+    if (!changedFlow) return;
+    if (changedFlow.ui.messages) {
+      setMessages(changedFlow.ui.messages);
+    }
+  }, [changedFlow])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
     ory
@@ -142,8 +183,8 @@ const Settings: NextPage = () => {
         <div id="settings">
           <h2 className="title">Profile management and security settings</h2>
           <div className="form-container">
+            <Messages messages={messages} />
             <h3 className="subtitle">Profile Settings</h3>
-            <Messages messages={changedFlow?.ui.messages} />
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -153,8 +194,7 @@ const Settings: NextPage = () => {
           </div>
           {!isOidc ?
             <div className="form-container">
-              <h3 className="subtitle">Change password</h3>
-              <Messages messages={changedFlow?.ui.messages} />
+              <h3 className="subtitle">{flowId ? 'Set' : 'Change'} password</h3>
               <Flow
                 hideGlobalMessages
                 onSubmit={onSubmit}
@@ -166,7 +206,6 @@ const Settings: NextPage = () => {
           {containsBackupCodes ? (<div className="form-container">
             <h3 className="subtitle">Manage 2FA backup recovery codes</h3>
             <p>Recovery codes can be used in panic situations where you have lost access to your 2FA device.</p>
-            <Messages messages={changedFlow?.ui.messages} />
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -184,7 +223,6 @@ const Settings: NextPage = () => {
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
                   target="_blank">Android</a>).
             </p>
-            <Messages messages={changedFlow?.ui.messages} />
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -193,8 +231,19 @@ const Settings: NextPage = () => {
             />
           </div>) : (<> </>)}
 
+          {isOidc && isOidcInvitation ? (<div className="form-container">
+            <Flow
+              hideGlobalMessages
+              onSubmit={onSubmit}
+              only="oidc"
+              flow={changedFlow}
+            />
+          </div>) : (<> </>)}
+
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/cognition">Back</a>
+            <button className="link disabled:opacity-50 disabled:cursor-not-allowed" data-testid="forgot-password" disabled={backButtonDisabled} onClick={() => {
+              router.push("/cognition")
+            }}>Back</button>
           </div>
         </div>
       </div>
