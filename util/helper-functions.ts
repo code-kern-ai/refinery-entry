@@ -1,6 +1,14 @@
-const customMessageOverrides = {
-    1060001: "Welcome to the app! You have successfully registered. Set your first, last name and password to continue.",
+const customMessageOverridesEnglish = {
+    1060001: "Welcome to the app! You have successfully registered. Set your first and last name to continue.",
+    '1060001a': "Welcome to the app! You have successfully registered. Set your first, last name and link your account to continue.",
+    1050001: "Your changes are saved!",
 };
+
+const customMessageOverridesGerman = {
+    1060001: "Willkommen in der App! Sie haben sich erfolgreich registriert. Bitte geben Sie Ihren Vor- und Nachnamen ein, um fortzufahren.",
+    '1060001a': "Willkommen in der App! Sie haben sich erfolgreich registriert. Bitte geben Sie Ihren Vor- und Nachnamen ein und verknüpfen Sie Ihr Konto, um fortzufahren.",
+    1050001: "Ihre Änderungen wurden gespeichert!",
+}
 
 export function getValueIdentifier(selectedRole: any) {
     let value = '';
@@ -64,6 +72,7 @@ export function prepareNodes(flow: any) {
     return filteredNodes;
 }
 
-export function displayMessage(msg: any): string {
-    return customMessageOverrides[msg.id] || msg.text;
+export function displayMessage(msg: any, language: string): string {
+    const selectDictMessages = language === "de" ? customMessageOverridesGerman : customMessageOverridesEnglish;
+    return selectDictMessages[msg.id] || msg.text;
 }

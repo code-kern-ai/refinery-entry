@@ -18,7 +18,6 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
-import { useConsoleLog } from "@/submodules/react-components/hooks/useConsoleLog"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -36,6 +35,8 @@ const Settings: NextPage = () => {
   const { flow: flowId, return_to: returnTo } = router.query
   const { t, i18n } = useTranslation('settings');
   const [language, setLanguage] = useState<string | undefined>(undefined);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showAuthenticator, setShowAuthenticator] = useState<boolean>(false);
 
   useEffect(() => {
     getUserInfoExtended((res) => {
@@ -114,7 +115,7 @@ const Settings: NextPage = () => {
     setChangedFlow(initialFlow)
 
     //prevent password change option display if sso
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
         initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
         setIsOidc(true);
@@ -128,7 +129,7 @@ const Settings: NextPage = () => {
           document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
         }
       }
-    });
+    }, 100);
   }, [initialFlow])
 
   useEffect(() => {
@@ -136,7 +137,7 @@ const Settings: NextPage = () => {
     const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
     const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
     if (isOidc && isOidcInvitation) {
-      if (firstNameButtonVal === "" || lastNameButtonVal === "") {
+      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined) && flowId) {
         setBackButtonDisabled(true);
       } else {
         setBackButtonDisabled(false);
@@ -144,7 +145,14 @@ const Settings: NextPage = () => {
     } else {
       const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
       const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
-      if (firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "") {
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
+        setShowPassword(true);
+      }
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
+        setShowAuthenticator(true);
+      }
+
+      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
         setBackButtonDisabled(true);
       } else {
         setBackButtonDisabled(false);
@@ -155,6 +163,12 @@ const Settings: NextPage = () => {
   useEffect(() => {
     if (!changedFlow) return;
     if (changedFlow.ui.messages) {
+      initialFlow.ui.messages = initialFlow.ui.messages.map((message: any) => {
+        if (message.id === 1060001) {
+          return { ...message, id: 1060001 + 'a' };
+        }
+        return message;
+      });
       setMessages(changedFlow.ui.messages);
     }
   }, [changedFlow])
@@ -181,8 +195,6 @@ const Settings: NextPage = () => {
         return Promise.reject(err)
       })
 
-  useConsoleLog(changedFlow)
-
   return (
     <>
       <Head>
@@ -205,7 +217,8 @@ const Settings: NextPage = () => {
               flow={changedFlow}
             />
           </div>
-          {!isOidc ?
+
+          {((flowId && !isOidc && showPassword) || !flowId) && (
             <div className="form-container">
               <h3 className="subtitle">{flowId ? t('changePassword') : t('setPassword')}</h3>
               <Flow
@@ -214,35 +227,38 @@ const Settings: NextPage = () => {
                 only="password"
                 flow={changedFlow}
               />
-            </div> : null}
+            </div>
+          )}
 
-          {containsBackupCodes ? (<div className="form-container">
-            <h3 className="subtitle">{t('backUpCodes')}</h3>
-            <p>{t('backUpCodesDescription')}</p>
-            <Flow
-              hideGlobalMessages
-              onSubmit={onSubmit}
-              only="lookup_secret"
-              flow={changedFlow}
-            />
-          </div>) : (<> </>)}
+          {showAuthenticator && <>
+            {containsBackupCodes ? (<div className="form-container">
+              <h3 className="subtitle">{t('backUpCodes')}</h3>
+              <p>{t('backUpCodesDescription')}</p>
+              <Flow
+                hideGlobalMessages
+                onSubmit={onSubmit}
+                only="lookup_secret"
+                flow={changedFlow}
+              />
+            </div>) : (<> </>)}
 
-          {containsTotp ? (<div className="form-container">
-            <h3 className="subtitle">{t('totpAuthenticator')}</h3>
-            <p>{t('addTotpAuthenticator')}
-              {t('popularAuthenticatorApps')} <a href="https://www.lastpass.com" target="_blank">LastPass</a>{t('and')} Google
-              Authenticator (<a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
-                target="_blank">iOS</a>, <a
-                  href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
-                  target="_blank">Android</a>).
-            </p>
-            <Flow
-              hideGlobalMessages
-              onSubmit={onSubmit}
-              only="totp"
-              flow={changedFlow}
-            />
-          </div>) : (<> </>)}
+            {containsTotp ? (<div className="form-container">
+              <h3 className="subtitle">{t('totpAuthenticator')}</h3>
+              <p>{t('addTotpAuthenticator')}
+                {t('popularAuthenticatorApps')} <a href="https://www.lastpass.com" target="_blank">LastPass</a>{t('and')} Google
+                Authenticator (<a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
+                  target="_blank">iOS</a>, <a
+                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
+                    target="_blank">Android</a>).
+              </p>
+              <Flow
+                hideGlobalMessages
+                onSubmit={onSubmit}
+                only="totp"
+                flow={changedFlow}
+              />
+            </div>) : (<> </>)}
+          </>}
 
           {isOidc && isOidcInvitation ? (<div className="form-container">
             <Flow
