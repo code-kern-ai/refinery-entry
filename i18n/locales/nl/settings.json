@@ -1,0 +1,19 @@
+{
+    "title": "Accountinstellingen",
+    "heading": "Profielbeheer en beveiligingsinstellingen",
+    "subtitle": "Profielinstellingen",
+    "changePassword": "Wachtwoord wijzigen",
+    "setPassword": "Wachtwoord instellen",
+    "backUpCodes": "Beheer 2FA-back-upherstelcodes",
+    "backUpCodesDescription": "Herstelcodes kunnen worden gebruikt in panieksituaties waarin u geen toegang meer hebt tot uw 2FA-apparaat.",
+    "totpAuthenticator": "Beheer 2FA TOTP Authenticator-app",
+    "addTotpAuthenticator": "Voeg een TOTP Authenticator-app toe aan uw account om de beveiliging ervan te verbeteren.",
+    "popularAuthenticatorApps": "Populaire authenticatie-apps zijn",
+    "and": "En",
+    "back": "Rug",
+    "email": "E-mail",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "password": "Wachtwoord",
+    "save": "Redden"
+}

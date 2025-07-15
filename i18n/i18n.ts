@@ -3,6 +3,8 @@ import settingsEN from './locales/en/settings.json'
 
 import settingsDE from './locales/de/settings.json'
 
+import settingsNL from './locales/nl/settings.json'
+
 i18n.init({
     resources: {
         en: {
@@ -10,6 +12,9 @@ i18n.init({
         },
         de: {
             settings: settingsDE,
+        },
+        nl: {
+            settings: settingsNL,
         },
     },
     ns: ["settings"],

@@ -10,6 +10,12 @@ const customMessageOverridesGerman = {
     1050001: "Ihre Änderungen wurden gespeichert!",
 }
 
+const customMessageOverridesDutch = {
+    1060001: "Welkom bij de app! Je bent succesvol geregistreerd. Vul je voor- en achternaam in om verder te gaan.",
+    '1060001a': "Welkom bij de app! Je bent succesvol geregistreerd. Vul je voor- en achternaam in en koppel je account om verder te gaan.",
+    1050001: "Uw wijzigingen zijn opgeslagen!",
+}
+
 export function getValueIdentifier(selectedRole: any) {
     let value = '';
     if (selectedRole === 'engineer') {
@@ -73,6 +79,6 @@ export function prepareNodes(flow: any) {
 }
 
 export function displayMessage(msg: any, language: string): string {
-    const selectDictMessages = language === "de" ? customMessageOverridesGerman : customMessageOverridesEnglish;
+    const selectDictMessages = language === "de" ? customMessageOverridesGerman : language === "nl" ? customMessageOverridesDutch : customMessageOverridesEnglish;
     return selectDictMessages[msg.id] || msg.text;
 }
