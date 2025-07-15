@@ -1,0 +1,19 @@
+{
+    "title": "Account settings",
+    "heading": "Profile management and security settings",
+    "subtitle": "Profile Settings",
+    "changePassword": "Change Password",
+    "setPassword": "Set Password",
+    "backUpCodes": "Manage 2FA backup recovery codes",
+    "backUpCodesDescription": "Recovery codes can be used in panic situations where you have lost access to your 2FA device.",
+    "totpAuthenticator": "Manage 2FA TOTP Authenticator App",
+    "addTotpAuthenticator": "Add a TOTP Authenticator App to your account to improve your account security.",
+    "popularAuthenticatorApps": "Popular Authenticator Apps are",
+    "and": "and",
+    "back": "Back",
+    "email": "E-Mail",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "password": "Password",
+    "save": "Save"
+}

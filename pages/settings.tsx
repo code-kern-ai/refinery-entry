@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
@@ -17,6 +17,8 @@ import { Application, CurrentPage } from "@/submodules/react-components/hooks/we
 import { AdminMessage } from "@/submodules/react-components/types/admin-messages"
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
+import { useTranslation } from "react-i18next"
+import { useConsoleLog } from "@/submodules/react-components/hooks/useConsoleLog"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -32,6 +34,8 @@ const Settings: NextPage = () => {
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
+  const { t, i18n } = useTranslation('settings');
+  const [language, setLanguage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     getUserInfoExtended((res) => {
@@ -42,6 +46,7 @@ const Settings: NextPage = () => {
           WebSocketsService.setConnectionOpened(true);
           WebSocketsService.initWsNotifications();
         }
+        setLanguage(res?.languageDisplay);
       }
     });
   }, []);
@@ -61,6 +66,11 @@ const Settings: NextPage = () => {
   }
 
   useWebsocket(user?.organizationId, Application.ENTRY, CurrentPage.ENTRY_LAYOUT, handleWebsocketNotification)
+
+  useEffect(() => {
+    if (!language) return;
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
@@ -170,21 +180,24 @@ const Settings: NextPage = () => {
 
         return Promise.reject(err)
       })
+
+  useConsoleLog(changedFlow)
+
   return (
     <>
       <Head>
         <title>
-          Account settings
+          {t('title')}
         </title>
         <meta name="description" content="NextJS + React + Vercel + Ory" />
       </Head>
       <div className="app-container">
         <KernLogo />
-        <div id="settings">
-          <h2 className="title">Profile management and security settings</h2>
+        {language && <div id="settings">
+          <h2 className="title">{t('heading')}</h2>
           <div className="form-container">
             <Messages messages={messages} />
-            <h3 className="subtitle">Profile Settings</h3>
+            <h3 className="subtitle">{t('subtitle')}</h3>
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -194,7 +207,7 @@ const Settings: NextPage = () => {
           </div>
           {!isOidc ?
             <div className="form-container">
-              <h3 className="subtitle">{flowId ? 'Set' : 'Change'} password</h3>
+              <h3 className="subtitle">{flowId ? t('changePassword') : t('setPassword')}</h3>
               <Flow
                 hideGlobalMessages
                 onSubmit={onSubmit}
@@ -204,8 +217,8 @@ const Settings: NextPage = () => {
             </div> : null}
 
           {containsBackupCodes ? (<div className="form-container">
-            <h3 className="subtitle">Manage 2FA backup recovery codes</h3>
-            <p>Recovery codes can be used in panic situations where you have lost access to your 2FA device.</p>
+            <h3 className="subtitle">{t('backUpCodes')}</h3>
+            <p>{t('backUpCodesDescription')}</p>
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -215,9 +228,9 @@ const Settings: NextPage = () => {
           </div>) : (<> </>)}
 
           {containsTotp ? (<div className="form-container">
-            <h3 className="subtitle">Manage 2FA TOTP Authenticator App</h3>
-            <p>Add a TOTP Authenticator App to your account to improve your account security.
-              Popular Authenticator Apps are <a href="https://www.lastpass.com" target="_blank">LastPass</a> and Google
+            <h3 className="subtitle">{t('totpAuthenticator')}</h3>
+            <p>{t('addTotpAuthenticator')}
+              {t('popularAuthenticatorApps')} <a href="https://www.lastpass.com" target="_blank">LastPass</a>{t('and')} Google
               Authenticator (<a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
                 target="_blank">iOS</a>, <a
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
@@ -243,9 +256,9 @@ const Settings: NextPage = () => {
           <div className="link-container">
             <button className="link disabled:opacity-50 disabled:cursor-not-allowed" data-testid="forgot-password" disabled={backButtonDisabled} onClick={() => {
               router.push("/cognition")
-            }}>Back</button>
+            }}>{t('back')}</button>
           </div>
-        </div>
+        </div>}
       </div>
       <div className="img-container">
       </div>

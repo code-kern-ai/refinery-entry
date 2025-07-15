@@ -2,6 +2,8 @@ import { getNodeLabel } from "@ory/integrations/ui"
 import { Button } from "@ory/themes"
 
 import { NodeInputProps } from "./helpers"
+import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 
 export function NodeInputSubmit<T>({
@@ -9,6 +11,20 @@ export function NodeInputSubmit<T>({
   attributes,
   disabled,
 }: NodeInputProps) {
+  const { t } = useTranslation('settings');
+  const [buttonName, setButtonName] = useState<string>("");
+
+  useEffect(() => {
+    // The settings page needs translated labels.
+    switch (getNodeLabel(node)) {
+      case "Save":
+        setButtonName(t('save'));
+        break;
+      default:
+        setButtonName(getNodeLabel(node));
+    }
+  }, [node, t]);
+
   return (
     <>
       {node.meta.label?.text == "Sign up" ?
@@ -22,7 +38,7 @@ export function NodeInputSubmit<T>({
         value={attributes.value || ""}
         disabled={attributes.disabled || disabled}
       >
-        {getNodeLabel(node)}
+        {buttonName}
       </Button>
     </>
   )
