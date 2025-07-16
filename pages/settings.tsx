@@ -18,6 +18,7 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
+import { useConsoleLog } from "@/submodules/react-components/hooks/useConsoleLog"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -37,6 +38,14 @@ const Settings: NextPage = () => {
   const [language, setLanguage] = useState<string | undefined>(undefined);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showAuthenticator, setShowAuthenticator] = useState<boolean>(false);
+  const [loadPage, setLoadPage] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (loadPage) return;
+    setTimeout(() => {
+      setLoadPage(true);
+    }, 1000);
+  }, [loadPage]);
 
   useEffect(() => {
     getUserInfoExtended((res) => {
@@ -164,14 +173,14 @@ const Settings: NextPage = () => {
     if (!changedFlow) return;
     if (changedFlow.ui.messages) {
       initialFlow.ui.messages = initialFlow.ui.messages.map((message: any) => {
-        if (message.id === 1060001) {
+        if (message.id === 1060001 && isOidc && isOidcInvitation) {
           return { ...message, id: 1060001 + 'a' };
         }
         return message;
       });
       setMessages(changedFlow.ui.messages);
     }
-  }, [changedFlow])
+  }, [changedFlow, isOidc, isOidcInvitation])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
     ory
@@ -218,17 +227,21 @@ const Settings: NextPage = () => {
             />
           </div>
 
-          {((flowId && !isOidc && showPassword) || !flowId) && (
-            <div className="form-container">
-              <h3 className="subtitle">{flowId ? t('changePassword') : t('setPassword')}</h3>
-              <Flow
-                hideGlobalMessages
-                onSubmit={onSubmit}
-                only="password"
-                flow={changedFlow}
-              />
-            </div>
-          )}
+          {loadPage && <>
+            {!(isOidc && isOidcInvitation) && <>
+              {((flowId && showPassword) || !flowId) && (
+                <div className="form-container">
+                  <h3 className="subtitle">{!flowId ? t('changePassword') : t('setPassword')}</h3>
+                  <Flow
+                    hideGlobalMessages
+                    onSubmit={onSubmit}
+                    only="password"
+                    flow={changedFlow}
+                  />
+                </div>
+              )}
+            </>}
+          </>}
 
           {showAuthenticator && <>
             {containsBackupCodes ? (<div className="form-container">
