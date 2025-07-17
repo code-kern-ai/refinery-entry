@@ -219,9 +219,13 @@ const Settings: NextPage = () => {
       }
       return message;
     });
+    messagesCopy.forEach((message: any) => {
+      if (message.id === '1050001ab') {
+        router.push('/cognition');
+      }
+    })
     setMessages(messagesMapped);
   }, [backButtonDisabled, changedFlow, flowId, isOidc]);
-
 
 
   return (
