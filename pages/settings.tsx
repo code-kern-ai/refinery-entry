@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
@@ -18,7 +18,6 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
-import { useConsoleLog } from "@/submodules/react-components/hooks/useConsoleLog"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -172,8 +171,9 @@ const Settings: NextPage = () => {
   useEffect(() => {
     if (!changedFlow) return;
     if (changedFlow.ui.messages) {
-      initialFlow.ui.messages = initialFlow.ui.messages.map((message: any) => {
-        if (flowId && !isOidc) {
+      const messagesCopy = [...initialFlow.ui.messages];
+      const messagesMapped = messagesCopy.map((message: any) => {
+        if (flowId) {
           if (message.id === 1060001 && isOidc && isOidcInvitation) {
             return { ...message, id: 1060001 + 'a' };
           }
@@ -183,7 +183,7 @@ const Settings: NextPage = () => {
         }
         return message;
       });
-      setMessages(changedFlow.ui.messages);
+      setMessages(messagesMapped);
     }
   }, [changedFlow, isOidc, isOidcInvitation, showPassword, flowId, isOidc])
 
@@ -211,13 +211,14 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     if (backButtonDisabled || !changedFlow || !changedFlow.ui.messages || !flowId) return;
-    changedFlow.ui.messages = changedFlow.ui.messages.map((message: any) => {
-      if (message.id === '1050001a' && !isOidc) {
-        return { ...message, id: "1050001ab" };
+    const messagesCopy = [...changedFlow.ui.messages];
+    const messagesMapped = messagesCopy.map((message: any) => {
+      if (message.id === 1050001 && !isOidc) {
+        return { ...message, id: 1050001 + 'ab' };
       }
       return message;
     });
-    setMessages(changedFlow.ui.messages);
+    setMessages(messagesMapped);
   }, [backButtonDisabled, changedFlow, flowId, isOidc]);
 
   return (

@@ -10,7 +10,6 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
   const { node, attributes, value = "", setValue, disabled } = props
   const { t } = useTranslation('settings');
   const [labelName, setLabelName] = useState<string>("");
-  const [placeholderName, setPlaceholderName] = useState<string>("");
 
 
   // Some attributes have dynamic JavaScript - this is for example required for WebAuthn.
@@ -25,27 +24,7 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
   }
 
   useEffect(() => {
-    // The settings page needs translated placeholders.
-    switch (getNodeLabel(node)) {
-      case "E-Mail":
-        setPlaceholderName(t('email'));
-        break;
-      case "First Name":
-        setPlaceholderName(t('firstName'));
-        break;
-      case "Last Name":
-        setPlaceholderName(t('lastName'));
-        break;
-      case "Password":
-        setPlaceholderName(t('password'));
-        break;
-      default:
-        setPlaceholderName(getNodeLabel(node));
-    }
-  }, [node, t]);
-
-  useEffect(() => {
-    // The settings page needs translated labels.
+    // The settings page needs translated labels & placeholder.
     switch (getNodeLabel(node)) {
       case "E-Mail":
         setLabelName(t('email'));
@@ -75,7 +54,7 @@ export function NodeInputDefault<T>(props: NodeInputProps) {
       className={"text-input" + (props.visible ? "" : " hidden")}
       type={attributes.type}
       name={attributes.name}
-      placeholder={placeholderName}
+      placeholder={labelName}
       value={value}
       disabled={attributes.disabled || disabled}
       help={node.messages.length > 0}
