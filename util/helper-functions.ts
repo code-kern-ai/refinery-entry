@@ -13,6 +13,7 @@ const customMessageOverridesGerman = {
     '1060001a': "Willkommen in der App! Sie haben sich erfolgreich registriert. Bitte geben Sie Ihren Vor- und Nachnamen ein und verknüpfen Sie Ihr Konto, um fortzufahren.",
     1050001: "Ihre Änderungen wurden gespeichert!",
     '1050001a': "Ihre Änderungen wurden gespeichert! Bitte setzen Sie Ihr Passwort, um fortzufahren.",
+    '1050001ab': "Ihr Passwort wurde erfolgreich gesetzt! ",
     4000032: "Das Passwort muss mindestens 8 Zeichen lang sein, aber es wurden weniger als 8 Zeichen eingegeben.",
     4000034: "Das Passwort wurde in Datenpannen gefunden und darf nicht mehr verwendet werden."
 }
@@ -22,6 +23,7 @@ const customMessageOverridesDutch = {
     '1060001a': "Welkom bij de app! Je bent succesvol geregistreerd. Vul je voor- en achternaam in en koppel je account om verder te gaan.",
     1050001: "Uw wijzigingen zijn opgeslagen!",
     '1050001a': "Uw wijzigingen zijn opgeslagen! Stel uw wachtwoord in om verder te gaan.",
+    '1050001ab': "Uw wachtwoord is succesvol ingesteld! ",
     4000032: "Het wachtwoord moet minimaal 8 tekens lang zijn, maar er zijn minder dan 8 tekens ingevoerd.",
     4000034: "Het wachtwoord is gevonden in datalekken en mag niet meer worden gebruikt."
 }
