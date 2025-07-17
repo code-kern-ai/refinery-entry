@@ -173,14 +173,19 @@ const Settings: NextPage = () => {
     if (!changedFlow) return;
     if (changedFlow.ui.messages) {
       initialFlow.ui.messages = initialFlow.ui.messages.map((message: any) => {
-        if (message.id === 1060001 && isOidc && isOidcInvitation) {
-          return { ...message, id: 1060001 + 'a' };
+        if (flowId && !isOidc) {
+          if (message.id === 1060001 && isOidc && isOidcInvitation) {
+            return { ...message, id: 1060001 + 'a' };
+          }
+          if (message.id === 1050001 && showPassword) {
+            return { ...message, id: 1050001 + 'a' };
+          }
         }
         return message;
       });
       setMessages(changedFlow.ui.messages);
     }
-  }, [changedFlow, isOidc, isOidcInvitation])
+  }, [changedFlow, isOidc, isOidcInvitation, showPassword, flowId, isOidc])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
     ory
@@ -203,6 +208,17 @@ const Settings: NextPage = () => {
 
         return Promise.reject(err)
       })
+
+  useEffect(() => {
+    if (backButtonDisabled || !changedFlow || !changedFlow.ui.messages || !flowId) return;
+    changedFlow.ui.messages = changedFlow.ui.messages.map((message: any) => {
+      if (message.id === '1050001a' && !isOidc) {
+        return { ...message, id: "1050001ab" };
+      }
+      return message;
+    });
+    setMessages(changedFlow.ui.messages);
+  }, [backButtonDisabled, changedFlow, flowId, isOidc]);
 
   return (
     <>
