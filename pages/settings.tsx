@@ -221,6 +221,8 @@ const Settings: NextPage = () => {
     setMessages(messagesMapped);
   }, [backButtonDisabled, changedFlow, flowId, isOidc]);
 
+
+
   return (
     <>
       <Head>
@@ -245,7 +247,7 @@ const Settings: NextPage = () => {
           </div>
 
           {loadPage && <>
-            {!(isOidc && isOidcInvitation) && <>
+            {!isOidc && <>
               {((flowId && showPassword) || !flowId) && (
                 <div className="form-container">
                   <h3 className="subtitle">{!flowId ? t('changePassword') : t('setPassword')}</h3>
@@ -290,7 +292,7 @@ const Settings: NextPage = () => {
             </div>) : (<> </>)}
           </>}
 
-          {isOidc && isOidcInvitation ? (<div className="form-container">
+          {(isOidc && isOidcInvitation) ? (<div className="form-container">
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
