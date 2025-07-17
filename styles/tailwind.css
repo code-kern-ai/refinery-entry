@@ -257,5 +257,5 @@ button.button-sign-in:focus {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }

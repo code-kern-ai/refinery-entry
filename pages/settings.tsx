@@ -155,6 +155,7 @@ const Settings: NextPage = () => {
       const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
       if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
         setShowPassword(true);
+        document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
       }
       if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
         setShowAuthenticator(true);
