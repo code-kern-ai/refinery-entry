@@ -242,7 +242,7 @@ const Settings: NextPage = () => {
     const messagesCopy = [...changedFlow.ui.messages];
     const messagesMapped = messagesCopy.map((message: any) => {
       console.log(message.id, isOidc, showPassword, backButtonDisabled, message.id === 1060001 && !isOidc && showPassword && backButtonDisabled);
-      if (message.id === 1060001 && !isOidc && showPassword && !backButtonDisabled) {
+      if (message.id === 1050001 && !isOidc && showPassword && !backButtonDisabled) {
         router.push('/cognition');
         return { ...message, id: '1050001ab' };
       }
