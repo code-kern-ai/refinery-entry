@@ -157,34 +157,34 @@ const Settings: NextPage = () => {
   useEffect(() => {
     console.log(loadPage);
     if (!changedFlow || !initialFlow || !loadPage) return;
-    setTimeout(() => {
-      const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
-      const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
-      if (isOidc && isOidcInvitation) {
-        if ((firstNameButtonVal === "" || lastNameButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined) && flowId) {
-          setBackButtonDisabled(true);
-        } else {
-          setBackButtonDisabled(false);
-        }
+    // setTimeout(() => {
+    const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
+    const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
+    if (isOidc && isOidcInvitation) {
+      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined) && flowId) {
+        setBackButtonDisabled(true);
       } else {
-        const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
-        const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
-        if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
-          setShowPassword(true);
-          document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
-        }
-        if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
-          setShowAuthenticator(true);
-        }
-
-        console.log(firstNameButtonVal, lastNameButtonVal, emailButtonVal, passwordButtonVal, flowId);
-        if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
-          setBackButtonDisabled(true);
-        } else {
-          setBackButtonDisabled(false);
-        }
+        setBackButtonDisabled(false);
       }
-    }, 0); // Wait for the page to load
+    } else {
+      const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
+      const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
+        setShowPassword(true);
+        document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+      }
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
+        setShowAuthenticator(true);
+      }
+
+      console.log(firstNameButtonVal, lastNameButtonVal, emailButtonVal, passwordButtonVal, flowId);
+      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
+        setBackButtonDisabled(true);
+      } else {
+        setBackButtonDisabled(false);
+      }
+    }
+    // }, 0); // Wait for the page to load
   }, [isOidc, isOidcInvitation, initialFlow, changedFlow, loadPage, flowId]);
 
   useEffect(() => {
