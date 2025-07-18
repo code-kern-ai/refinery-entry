@@ -1,6 +1,7 @@
 const customMessageOverridesEnglish = {
     1060001: "Welcome to the app! You have successfully registered. Set your first and last name to continue.",
     '1060001a': "Welcome to the app! You have successfully registered. Set your first, last name and link your account to continue.",
+    '1060001b': "Welcome to the app! You have successfully recovered your account.",
     1050001: "Your changes are saved!",
     '1050001a': "Your changes are saved! Please set your password to continue.",
     '1050001ab': "Your password has been set successfully! ",
@@ -12,6 +13,7 @@ const customMessageOverridesEnglish = {
 const customMessageOverridesGerman = {
     1060001: "Willkommen in der App! Sie haben sich erfolgreich registriert. Bitte geben Sie Ihren Vor- und Nachnamen ein, um fortzufahren.",
     '1060001a': "Willkommen in der App! Sie haben sich erfolgreich registriert. Bitte geben Sie Ihren Vor- und Nachnamen ein und verknüpfen Sie Ihr Konto, um fortzufahren.",
+    '1060001b': "Willkommen in der App! Sie haben Ihr Konto erfolgreich wiederhergestellt.",
     1050001: "Ihre Änderungen wurden gespeichert!",
     '1050001a': "Ihre Änderungen wurden gespeichert! Bitte setzen Sie Ihr Passwort, um fortzufahren.",
     '1050001ab': "Ihr Passwort wurde erfolgreich gesetzt! ",
@@ -23,6 +25,7 @@ const customMessageOverridesGerman = {
 const customMessageOverridesDutch = {
     1060001: "Welkom bij de app! Je bent succesvol geregistreerd. Vul je voor- en achternaam in om verder te gaan.",
     '1060001a': "Welkom bij de app! Je bent succesvol geregistreerd. Vul je voor- en achternaam in en koppel je account om verder te gaan.",
+    '1060001b': "Welkom bij de app! Je hebt je account succesvol hersteld.",
     1050001: "Uw wijzigingen zijn opgeslagen!",
     '1050001a': "Uw wijzigingen zijn opgeslagen! Stel uw wachtwoord in om verder te gaan.",
     '1050001ab': "Uw wachtwoord is succesvol ingesteld! ",

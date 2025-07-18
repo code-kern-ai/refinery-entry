@@ -40,11 +40,24 @@ const Settings: NextPage = () => {
   const [loadPage, setLoadPage] = useState<boolean>(false);
 
   useEffect(() => {
-    if (loadPage) return;
-    setTimeout(() => {
-      setLoadPage(true);
-    }, 1000);
-  }, [loadPage]);
+    const onLoad = () => {
+      console.log('All elements including images and external resources are fully loaded.');
+      setTimeout(() => { setLoadPage(true); }, 1000);
+    };
+
+    if (document.readyState === 'complete') {
+      onLoad();
+    } else {
+      window.addEventListener('load', onLoad);
+      return () => window.removeEventListener('load', onLoad);
+    }
+  }, []);
+  // useEffect(() => {
+  //   if (loadPage) return;
+  //   setTimeout(() => {
+  //     setLoadPage(true);
+  //   }, 1000);
+  // }, [loadPage]);
 
   useEffect(() => {
     getUserInfoExtended((res) => {
@@ -141,33 +154,35 @@ const Settings: NextPage = () => {
   }, [initialFlow])
 
   useEffect(() => {
-    if (!changedFlow || !initialFlow) return;
-    const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
-    const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
-    if (isOidc && isOidcInvitation) {
-      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined) && flowId) {
-        setBackButtonDisabled(true);
+    if (!changedFlow || !initialFlow || !loadPage) return;
+    setTimeout(() => {
+      const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
+      const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
+      if (isOidc && isOidcInvitation) {
+        if ((firstNameButtonVal === "" || lastNameButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined) && flowId) {
+          setBackButtonDisabled(true);
+        } else {
+          setBackButtonDisabled(false);
+        }
       } else {
-        setBackButtonDisabled(false);
-      }
-    } else {
-      const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
-      const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
-      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
-        setShowPassword(true);
-        document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
-      }
-      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
-        setShowAuthenticator(true);
-      }
+        const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
+        const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
+        if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
+          setShowPassword(true);
+          document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+        }
+        if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
+          setShowAuthenticator(true);
+        }
 
-      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
-        setBackButtonDisabled(true);
-      } else {
-        setBackButtonDisabled(false);
+        if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
+          setBackButtonDisabled(true);
+        } else {
+          setBackButtonDisabled(false);
+        }
       }
-    }
-  }, [isOidc, isOidcInvitation, initialFlow, changedFlow]);
+    }, 0); // Wait for the page to load
+  }, [isOidc, isOidcInvitation, initialFlow, changedFlow, loadPage]);
 
   useEffect(() => {
     if (!changedFlow) return;
@@ -180,6 +195,10 @@ const Settings: NextPage = () => {
           }
           if (message.id === 1050001 && showPassword) {
             return { ...message, id: 1050001 + 'a' };
+          }
+          if (message.id === 1060001 && !isOidc && !isOidcInvitation) {
+            return { ...message, id: 1060001 + 'b' };
+
           }
         }
         return message;
@@ -219,11 +238,7 @@ const Settings: NextPage = () => {
       }
       return message;
     });
-    messagesCopy.forEach((message: any) => {
-      if (message.id === '1050001ab') {
-        router.push('/cognition');
-      }
-    })
+    console.log(messagesMapped);
     setMessages(messagesMapped);
   }, [backButtonDisabled, changedFlow, flowId, isOidc]);
 
@@ -238,7 +253,7 @@ const Settings: NextPage = () => {
       </Head>
       <div className="app-container">
         <KernLogo />
-        {language && <div id="settings">
+        {(language && loadPage) && <div id="settings">
           <h2 className="title">{t('heading')}</h2>
           <div className="form-container">
             <Messages messages={messages} />
@@ -251,20 +266,18 @@ const Settings: NextPage = () => {
             />
           </div>
 
-          {loadPage && <>
-            {!isOidc && <>
-              {((flowId && showPassword) || !flowId) && (
-                <div className="form-container">
-                  <h3 className="subtitle">{!flowId ? t('changePassword') : t('setPassword')}</h3>
-                  <Flow
-                    hideGlobalMessages
-                    onSubmit={onSubmit}
-                    only="password"
-                    flow={changedFlow}
-                  />
-                </div>
-              )}
-            </>}
+          {!isOidc && <>
+            {((flowId && showPassword) || !flowId) && (
+              <div className="form-container">
+                <h3 className="subtitle">{!flowId ? t('changePassword') : t('setPassword')}</h3>
+                <Flow
+                  hideGlobalMessages
+                  onSubmit={onSubmit}
+                  only="password"
+                  flow={changedFlow}
+                />
+              </div>
+            )}
           </>}
 
           {showAuthenticator && <>
