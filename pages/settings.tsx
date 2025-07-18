@@ -18,6 +18,7 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
+import { useConsoleLog } from "@/submodules/react-components/hooks/useConsoleLog"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -154,6 +155,7 @@ const Settings: NextPage = () => {
   }, [initialFlow])
 
   useEffect(() => {
+    console.log(loadPage);
     if (!changedFlow || !initialFlow || !loadPage) return;
     setTimeout(() => {
       const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
@@ -175,6 +177,7 @@ const Settings: NextPage = () => {
           setShowAuthenticator(true);
         }
 
+        console.log(firstNameButtonVal, lastNameButtonVal, emailButtonVal, passwordButtonVal, flowId);
         if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
           setBackButtonDisabled(true);
         } else {
@@ -182,7 +185,7 @@ const Settings: NextPage = () => {
         }
       }
     }, 0); // Wait for the page to load
-  }, [isOidc, isOidcInvitation, initialFlow, changedFlow, loadPage]);
+  }, [isOidc, isOidcInvitation, initialFlow, changedFlow, loadPage, flowId]);
 
   useEffect(() => {
     if (!changedFlow) return;
@@ -229,18 +232,24 @@ const Settings: NextPage = () => {
         return Promise.reject(err)
       })
 
+  useConsoleLog(showPassword, 'showPassword');
+  useConsoleLog(backButtonDisabled, 'backButtonDisabled');
+
+
   useEffect(() => {
+    console.log('useEffect triggered for messages update', backButtonDisabled, changedFlow, flowId, isOidc, showPassword);
     if (backButtonDisabled || !changedFlow || !changedFlow.ui.messages || !flowId) return;
     const messagesCopy = [...changedFlow.ui.messages];
     const messagesMapped = messagesCopy.map((message: any) => {
-      if (message.id === 1060001 && !isOidc) {
+      console.log(message.id, isOidc, showPassword, backButtonDisabled, message.id === 1060001 && !isOidc && showPassword && backButtonDisabled);
+      if (message.id === 1060001 && !isOidc && showPassword && !backButtonDisabled) {
         router.push('/cognition');
         return { ...message, id: '1050001ab' };
       }
       return message;
     });
     setMessages(messagesMapped);
-  }, [backButtonDisabled, changedFlow, flowId, isOidc]);
+  }, [backButtonDisabled, changedFlow, flowId, isOidc, showPassword]);
 
 
   return (
