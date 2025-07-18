@@ -233,12 +233,12 @@ const Settings: NextPage = () => {
     if (backButtonDisabled || !changedFlow || !changedFlow.ui.messages || !flowId) return;
     const messagesCopy = [...changedFlow.ui.messages];
     const messagesMapped = messagesCopy.map((message: any) => {
-      if (message.id === 1050001 && !isOidc) {
-        return { ...message, id: 1050001 + 'ab' };
+      if (message.id === 1060001 && !isOidc) {
+        router.push('/cognition');
+        return { ...message, id: '1050001ab' };
       }
       return message;
     });
-    console.log(messagesMapped);
     setMessages(messagesMapped);
   }, [backButtonDisabled, changedFlow, flowId, isOidc]);
 
