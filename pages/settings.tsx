@@ -18,7 +18,6 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
-import { useConsoleLog } from "@/submodules/react-components/hooks/useConsoleLog"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -39,26 +38,27 @@ const Settings: NextPage = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showAuthenticator, setShowAuthenticator] = useState<boolean>(false);
   const [loadPage, setLoadPage] = useState<boolean>(false);
+  const [canShow, setCanShow] = useState<boolean>(false);
 
   useEffect(() => {
-    const onLoad = () => {
-      console.log('All elements including images and external resources are fully loaded.');
-      setTimeout(() => { setLoadPage(true); }, 1000);
-    };
-
-    if (document.readyState === 'complete') {
-      onLoad();
-    } else {
-      window.addEventListener('load', onLoad);
-      return () => window.removeEventListener('load', onLoad);
-    }
-  }, []);
-  // useEffect(() => {
-  //   if (loadPage) return;
-  //   setTimeout(() => {
-  //     setLoadPage(true);
-  //   }, 1000);
-  // }, [loadPage]);
+    if (loadPage) return;
+    setTimeout(() => {
+      setLoadPage(true);
+      const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
+      const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
+      const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined && emailButtonVal !== "" && emailButtonVal !== undefined && flowId) {
+        setShowPassword(true);
+        document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+        setTimeout(() => {
+          const existsPassword = document.querySelector('input[name="password"]') !== null;
+          if (!existsPassword) {
+            document.querySelector('button[value="profile"]')?.setAttribute("class", "block");
+          }
+        }, 100);
+      }
+    }, 1000);
+  }, [loadPage, flowId]);
 
   useEffect(() => {
     getUserInfoExtended((res) => {
@@ -124,7 +124,7 @@ const Settings: NextPage = () => {
   }, [flowId, router, router.isReady, returnTo, initialFlow])
 
   useEffect(() => {
-    if (!initialFlow) return;
+    if (!initialFlow || !loadPage) return;
     initialFlow.ui.nodes = prepareNodes(initialFlow);
     const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
     const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
@@ -141,6 +141,7 @@ const Settings: NextPage = () => {
       if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
         initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
         setIsOidc(true);
+        setCanShow(true);
         if (initialFlow.identity.metadata_public?.registration_scope?.invitation_sso) {
           setIsOidcInvitation(true);
         }
@@ -151,13 +152,15 @@ const Settings: NextPage = () => {
           document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
         }
       }
+      else {
+        setIsOidc(false);
+        setCanShow(true);
+      }
     }, 100);
-  }, [initialFlow])
+  }, [initialFlow, loadPage])
 
   useEffect(() => {
-    console.log(loadPage);
     if (!changedFlow || !initialFlow || !loadPage) return;
-    // setTimeout(() => {
     const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
     const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
     if (isOidc && isOidcInvitation) {
@@ -171,21 +174,20 @@ const Settings: NextPage = () => {
       const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
       if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
         setShowPassword(true);
-        document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+        if (flowId && !isOidc) {
+          document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+        }
       }
       if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
         setShowAuthenticator(true);
       }
-
-      console.log(firstNameButtonVal, lastNameButtonVal, emailButtonVal, passwordButtonVal, flowId);
       if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
         setBackButtonDisabled(true);
       } else {
         setBackButtonDisabled(false);
       }
     }
-    // }, 0); // Wait for the page to load
-  }, [isOidc, isOidcInvitation, initialFlow, changedFlow, loadPage, flowId]);
+  }, [isOidc, isOidcInvitation, initialFlow, changedFlow, flowId, loadPage]);
 
   useEffect(() => {
     if (!changedFlow) return;
@@ -232,16 +234,11 @@ const Settings: NextPage = () => {
         return Promise.reject(err)
       })
 
-  useConsoleLog(showPassword, 'showPassword');
-  useConsoleLog(backButtonDisabled, 'backButtonDisabled');
-
 
   useEffect(() => {
-    console.log('useEffect triggered for messages update', backButtonDisabled, changedFlow, flowId, isOidc, showPassword);
     if (backButtonDisabled || !changedFlow || !changedFlow.ui.messages || !flowId) return;
     const messagesCopy = [...changedFlow.ui.messages];
     const messagesMapped = messagesCopy.map((message: any) => {
-      console.log(message.id, isOidc, showPassword, backButtonDisabled, message.id === 1060001 && !isOidc && showPassword && backButtonDisabled);
       if (message.id === 1050001 && !isOidc && showPassword && !backButtonDisabled) {
         router.push('/cognition');
         return { ...message, id: '1050001ab' };
@@ -250,7 +247,6 @@ const Settings: NextPage = () => {
     });
     setMessages(messagesMapped);
   }, [backButtonDisabled, changedFlow, flowId, isOidc, showPassword]);
-
 
   return (
     <>
@@ -275,7 +271,7 @@ const Settings: NextPage = () => {
             />
           </div>
 
-          {!isOidc && <>
+          {(!isOidc && canShow) && <>
             {((flowId && showPassword) || !flowId) && (
               <div className="form-container">
                 <h3 className="subtitle">{!flowId ? t('changePassword') : t('setPassword')}</h3>
