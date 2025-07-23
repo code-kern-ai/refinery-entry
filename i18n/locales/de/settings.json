@@ -1,0 +1,19 @@
+{
+    "title": "Kontoeinstellungen",
+    "heading": "Profilverwaltung und Sicherheitseinstellungen",
+    "subtitle": "Profileinstellungen",
+    "changePassword": "Passwort ändern",
+    "setPassword": "Passwort festlegen",
+    "backUpCodes": "Verwalten von 2FA-Backup-Wiederherstellungscodes",
+    "backUpCodesDescription": "Wiederherstellungscodes können in Paniksituationen verwendet werden, wenn Sie den Zugriff auf Ihr 2FA-Gerät verloren haben.",
+    "totpAuthenticator": "2FA TOTP Authenticator App verwalten",
+    "addTotpAuthenticator": "Fügen Sie Ihrem Konto eine TOTP-Authentifikator-App hinzu, um die Sicherheit Ihres Kontos zu verbessern.",
+    "popularAuthenticatorApps": "Beliebte Authenticator-Apps sind",
+    "and": "und",
+    "back": "Zurück",
+    "email": "E-Mail",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "password": "Passwort",
+    "save": "Speichern"
+}

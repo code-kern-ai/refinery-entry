@@ -1,8 +1,10 @@
+import i18n from "@/i18n/i18n";
 import "../styles/tailwind.css"
 import '@/submodules/tailwind-config/global.css';
 import { theme, globalStyles, ThemeProps } from "@ory/themes"
 import type { AppProps } from "next/app"
 import Head from "next/head"
+import { I18nextProvider } from "react-i18next";
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { ThemeProvider } from "styled-components"
@@ -14,7 +16,7 @@ const GlobalStyle = createGlobalStyle((props: ThemeProps) =>
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <I18nextProvider i18n={i18n}>
       <Head>
         <title>kern</title>
         <link rel="icon" type="image/x-icon"
@@ -27,7 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <ToastContainer />
         </ThemeProvider>
       </div>
-    </>
+    </I18nextProvider>
 
   )
 }

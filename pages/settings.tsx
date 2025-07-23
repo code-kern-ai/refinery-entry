@@ -17,6 +17,7 @@ import { Application, CurrentPage } from "@/submodules/react-components/hooks/we
 import { AdminMessage } from "@/submodules/react-components/types/admin-messages"
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
+import { useTranslation } from "react-i18next"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -32,6 +33,32 @@ const Settings: NextPage = () => {
   // Get ?flow=... from the URL
   const router = useRouter()
   const { flow: flowId, return_to: returnTo } = router.query
+  const { t, i18n } = useTranslation('settings');
+  const [language, setLanguage] = useState<string | undefined>(undefined);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showAuthenticator, setShowAuthenticator] = useState<boolean>(false);
+  const [loadPage, setLoadPage] = useState<boolean>(false);
+  const [canShow, setCanShow] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (loadPage) return;
+    setTimeout(() => {
+      setLoadPage(true);
+      const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
+      const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
+      const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined && emailButtonVal !== "" && emailButtonVal !== undefined && flowId) {
+        setShowPassword(true);
+        document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+        setTimeout(() => {
+          const existsPassword = document.querySelector('input[name="password"]') !== null;
+          if (!existsPassword) {
+            document.querySelector('button[value="profile"]')?.setAttribute("class", "block");
+          }
+        }, 100);
+      }
+    }, 1000);
+  }, [loadPage, flowId]);
 
   useEffect(() => {
     getUserInfoExtended((res) => {
@@ -42,6 +69,7 @@ const Settings: NextPage = () => {
           WebSocketsService.setConnectionOpened(true);
           WebSocketsService.initWsNotifications();
         }
+        setLanguage(res?.languageDisplay);
       }
     });
   }, []);
@@ -61,6 +89,11 @@ const Settings: NextPage = () => {
   }
 
   useWebsocket(user?.organizationId, Application.ENTRY, CurrentPage.ENTRY_LAYOUT, handleWebsocketNotification)
+
+  useEffect(() => {
+    if (!language) return;
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
@@ -91,7 +124,7 @@ const Settings: NextPage = () => {
   }, [flowId, router, router.isReady, returnTo, initialFlow])
 
   useEffect(() => {
-    if (!initialFlow) return;
+    if (!initialFlow || !loadPage) return;
     initialFlow.ui.nodes = prepareNodes(initialFlow);
     const checkIfTotp = initialFlow.ui.nodes.find((node: UiNode) => node.group === "totp");
     const checkIfBackupCodes = initialFlow.ui.nodes.find((node: UiNode) => node.group === "lookup_secret");
@@ -104,10 +137,11 @@ const Settings: NextPage = () => {
     setChangedFlow(initialFlow)
 
     //prevent password change option display if sso
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
         initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
         setIsOidc(true);
+        setCanShow(true);
         if (initialFlow.identity.metadata_public?.registration_scope?.invitation_sso) {
           setIsOidcInvitation(true);
         }
@@ -118,15 +152,19 @@ const Settings: NextPage = () => {
           document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
         }
       }
-    });
-  }, [initialFlow])
+      else {
+        setIsOidc(false);
+        setCanShow(true);
+      }
+    }, 100);
+  }, [initialFlow, loadPage])
 
   useEffect(() => {
-    if (!changedFlow || !initialFlow) return;
+    if (!changedFlow || !initialFlow || !loadPage) return;
     const firstNameButtonVal = (document.querySelector('input[name="traits.name.first"]') as HTMLInputElement)?.value;
     const lastNameButtonVal = (document.querySelector('input[name="traits.name.last"]') as HTMLInputElement)?.value;
     if (isOidc && isOidcInvitation) {
-      if (firstNameButtonVal === "" || lastNameButtonVal === "") {
+      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined) && flowId) {
         setBackButtonDisabled(true);
       } else {
         setBackButtonDisabled(false);
@@ -134,20 +172,45 @@ const Settings: NextPage = () => {
     } else {
       const emailButtonVal = (document.querySelector('input[name="traits.email"]') as HTMLInputElement)?.value;
       const passwordButtonVal = (document.querySelector('input[name="password"]') as HTMLInputElement)?.value;
-      if (firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "") {
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && firstNameButtonVal !== undefined && lastNameButtonVal !== undefined) {
+        setShowPassword(true);
+        if (flowId && !isOidc) {
+          document.querySelector('button[value="profile"]')?.setAttribute("class", "hidden");
+        }
+      }
+      if (firstNameButtonVal !== "" && lastNameButtonVal !== "" && passwordButtonVal !== "" && passwordButtonVal !== undefined) {
+        setShowAuthenticator(true);
+      }
+      if ((firstNameButtonVal === "" || lastNameButtonVal === "" || emailButtonVal === "" || passwordButtonVal === "" || firstNameButtonVal === undefined || lastNameButtonVal === undefined || emailButtonVal === undefined || passwordButtonVal === undefined) && flowId) {
         setBackButtonDisabled(true);
       } else {
         setBackButtonDisabled(false);
       }
     }
-  }, [isOidc, isOidcInvitation, initialFlow, changedFlow]);
+  }, [isOidc, isOidcInvitation, initialFlow, changedFlow, flowId, loadPage]);
 
   useEffect(() => {
     if (!changedFlow) return;
     if (changedFlow.ui.messages) {
-      setMessages(changedFlow.ui.messages);
+      const messagesCopy = [...initialFlow.ui.messages];
+      const messagesMapped = messagesCopy.map((message: any) => {
+        if (flowId) {
+          if (message.id === 1060001 && isOidc && isOidcInvitation) {
+            return { ...message, id: 1060001 + 'a' };
+          }
+          if (message.id === 1050001 && showPassword) {
+            return { ...message, id: 1050001 + 'a' };
+          }
+          if (message.id === 1060001 && !isOidc && !isOidcInvitation) {
+            return { ...message, id: 1060001 + 'b' };
+
+          }
+        }
+        return message;
+      });
+      setMessages(messagesMapped);
     }
-  }, [changedFlow])
+  }, [changedFlow, isOidc, isOidcInvitation, showPassword, flowId, isOidc])
 
   const onSubmit = (values: UpdateSettingsFlowBody) =>
     ory
@@ -170,21 +233,36 @@ const Settings: NextPage = () => {
 
         return Promise.reject(err)
       })
+
+
+  useEffect(() => {
+    if (backButtonDisabled || !changedFlow || !changedFlow.ui.messages || !flowId) return;
+    const messagesCopy = [...changedFlow.ui.messages];
+    const messagesMapped = messagesCopy.map((message: any) => {
+      if (message.id === 1050001 && !isOidc && showPassword && !backButtonDisabled) {
+        router.push('/cognition');
+        return { ...message, id: '1050001ab' };
+      }
+      return message;
+    });
+    setMessages(messagesMapped);
+  }, [backButtonDisabled, changedFlow, flowId, isOidc, showPassword]);
+
   return (
     <>
       <Head>
         <title>
-          Account settings
+          {t('title')}
         </title>
         <meta name="description" content="NextJS + React + Vercel + Ory" />
       </Head>
       <div className="app-container">
         <KernLogo />
-        <div id="settings">
-          <h2 className="title">Profile management and security settings</h2>
+        {(language && loadPage) && <div id="settings">
+          <h2 className="title">{t('heading')}</h2>
           <div className="form-container">
             <Messages messages={messages} />
-            <h3 className="subtitle">Profile Settings</h3>
+            <h3 className="subtitle">{t('subtitle')}</h3>
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -192,46 +270,52 @@ const Settings: NextPage = () => {
               flow={changedFlow}
             />
           </div>
-          {!isOidc ?
-            <div className="form-container">
-              <h3 className="subtitle">{flowId ? 'Set' : 'Change'} password</h3>
+
+          {(!isOidc && canShow) && <>
+            {((flowId && showPassword) || !flowId) && (
+              <div className="form-container">
+                <h3 className="subtitle">{!flowId ? t('changePassword') : t('setPassword')}</h3>
+                <Flow
+                  hideGlobalMessages
+                  onSubmit={onSubmit}
+                  only="password"
+                  flow={changedFlow}
+                />
+              </div>
+            )}
+          </>}
+
+          {showAuthenticator && <>
+            {containsBackupCodes ? (<div className="form-container">
+              <h3 className="subtitle">{t('backUpCodes')}</h3>
+              <p>{t('backUpCodesDescription')}</p>
               <Flow
                 hideGlobalMessages
                 onSubmit={onSubmit}
-                only="password"
+                only="lookup_secret"
                 flow={changedFlow}
               />
-            </div> : null}
+            </div>) : (<> </>)}
 
-          {containsBackupCodes ? (<div className="form-container">
-            <h3 className="subtitle">Manage 2FA backup recovery codes</h3>
-            <p>Recovery codes can be used in panic situations where you have lost access to your 2FA device.</p>
-            <Flow
-              hideGlobalMessages
-              onSubmit={onSubmit}
-              only="lookup_secret"
-              flow={changedFlow}
-            />
-          </div>) : (<> </>)}
+            {containsTotp ? (<div className="form-container">
+              <h3 className="subtitle">{t('totpAuthenticator')}</h3>
+              <p>{t('addTotpAuthenticator')}
+                {t('popularAuthenticatorApps')} <a href="https://www.lastpass.com" target="_blank">LastPass</a>{t('and')} Google
+                Authenticator (<a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
+                  target="_blank">iOS</a>, <a
+                    href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
+                    target="_blank">Android</a>).
+              </p>
+              <Flow
+                hideGlobalMessages
+                onSubmit={onSubmit}
+                only="totp"
+                flow={changedFlow}
+              />
+            </div>) : (<> </>)}
+          </>}
 
-          {containsTotp ? (<div className="form-container">
-            <h3 className="subtitle">Manage 2FA TOTP Authenticator App</h3>
-            <p>Add a TOTP Authenticator App to your account to improve your account security.
-              Popular Authenticator Apps are <a href="https://www.lastpass.com" target="_blank">LastPass</a> and Google
-              Authenticator (<a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
-                target="_blank">iOS</a>, <a
-                  href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
-                  target="_blank">Android</a>).
-            </p>
-            <Flow
-              hideGlobalMessages
-              onSubmit={onSubmit}
-              only="totp"
-              flow={changedFlow}
-            />
-          </div>) : (<> </>)}
-
-          {isOidc && isOidcInvitation ? (<div className="form-container">
+          {(isOidc && isOidcInvitation) ? (<div className="form-container">
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
@@ -243,9 +327,9 @@ const Settings: NextPage = () => {
           <div className="link-container">
             <button className="link disabled:opacity-50 disabled:cursor-not-allowed" data-testid="forgot-password" disabled={backButtonDisabled} onClick={() => {
               router.push("/cognition")
-            }}>Back</button>
+            }}>{t('back')}</button>
           </div>
-        </div>
+        </div>}
       </div>
       <div className="img-container">
       </div>
