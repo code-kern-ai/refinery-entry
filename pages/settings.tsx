@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
@@ -18,6 +18,7 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
+import { AutoLogoutProgressBar } from "@/submodules/react-components/components/AutoLogoutProgressBar"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -39,6 +40,7 @@ const Settings: NextPage = () => {
   const [showAuthenticator, setShowAuthenticator] = useState<boolean>(false);
   const [loadPage, setLoadPage] = useState<boolean>(false);
   const [canShow, setCanShow] = useState<boolean>(false);
+  const autoLogoutRef = useRef(null);
 
   useEffect(() => {
     if (loadPage) return;
@@ -76,6 +78,7 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     refetchAdminMessagesAndProcess();
+    localStorage.setItem("comesFromEntry", "true");
   }, []);
 
   const handleWebsocketNotification = useCallback((msgParts: string[]) => {
@@ -333,6 +336,7 @@ const Settings: NextPage = () => {
       </div>
       <div className="img-container">
       </div>
+      <AutoLogoutProgressBar ref={autoLogoutRef} className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} />
       <AdminMessages
         adminMessages={activeAdminMessages}
         setActiveAdminMessages={setActiveAdminMessages} />
