@@ -356,7 +356,7 @@ const Settings: NextPage = () => {
       </div>
       <div className="img-container">
       </div>
-      <AutoLogoutProgressBar ref={autoLogoutRef} className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} preventLogout={true} />
+      {(language && loadPage) && <AutoLogoutProgressBar ref={autoLogoutRef} className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} preventLogout={true} />}
       <AdminMessages
         adminMessages={activeAdminMessages}
         setActiveAdminMessages={setActiveAdminMessages} />

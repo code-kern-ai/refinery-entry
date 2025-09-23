@@ -15,5 +15,8 @@
     "firstName": "Vorname",
     "lastName": "Nachname",
     "password": "Passwort",
-    "save": "Speichern"
+    "save": "Speichern",
+    "overview": {
+        "remainingTime": "Verbleibende Zeit vor der automatischen Abmeldung"
+    }
 }
