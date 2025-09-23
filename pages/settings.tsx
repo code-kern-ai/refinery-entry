@@ -81,6 +81,26 @@ const Settings: NextPage = () => {
     localStorage.setItem("comesFromEntry", "true");
   }, []);
 
+  useEffect(() => {
+    const resetTimer = () => {
+      autoLogoutRef.current?.resetTimer();
+    }
+    const onKeyDownEvent = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      // used for the chat input (we want to trigger rest on typing)
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        resetTimer();
+      }
+    };
+    window.addEventListener("click", resetTimer);
+    window.addEventListener("keydown", onKeyDownEvent)
+    return () => {
+      window.removeEventListener("click", resetTimer);
+      window.removeEventListener("keydown", onKeyDownEvent)
+    };
+  }, []);
+
+
   const handleWebsocketNotification = useCallback((msgParts: string[]) => {
     if (msgParts[1] == 'admin_message') {
       refetchAdminMessagesAndProcess();
@@ -336,7 +356,7 @@ const Settings: NextPage = () => {
       </div>
       <div className="img-container">
       </div>
-      <AutoLogoutProgressBar ref={autoLogoutRef} className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} />
+      <AutoLogoutProgressBar ref={autoLogoutRef} className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} preventLogout={false} />
       <AdminMessages
         adminMessages={activeAdminMessages}
         setActiveAdminMessages={setActiveAdminMessages} />
