@@ -72,6 +72,9 @@ const Settings: NextPage = () => {
           WebSocketsService.initWsNotifications();
         }
         setLanguage(res?.languageDisplay);
+        if (res?.autoLogoutMinutes) {
+          localStorage.setItem("comesFromEntry", "true");
+        }
       }
     });
   }, []);
@@ -79,11 +82,6 @@ const Settings: NextPage = () => {
   useEffect(() => {
     refetchAdminMessagesAndProcess();
   }, []);
-
-  useEffect(() => {
-    if (!user?.autoLogoutMinutes) return;
-    localStorage.setItem("comesFromEntry", "true");
-  }, [user?.autoLogoutMinutes]);
 
   useEffect(() => {
     const resetTimer = () => {
