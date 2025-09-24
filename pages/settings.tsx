@@ -78,8 +78,12 @@ const Settings: NextPage = () => {
 
   useEffect(() => {
     refetchAdminMessagesAndProcess();
-    localStorage.setItem("comesFromEntry", "true");
   }, []);
+
+  useEffect(() => {
+    if (!user?.autoLogoutMinutes) return;
+    localStorage.setItem("comesFromEntry", "true");
+  }, [user?.autoLogoutMinutes]);
 
   useEffect(() => {
     const resetTimer = () => {
