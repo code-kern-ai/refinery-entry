@@ -72,7 +72,6 @@ const Settings: NextPage = () => {
           WebSocketsService.initWsNotifications();
         }
         setLanguage(res?.languageDisplay);
-        console.log("res?.autoLogoutMinutes", res?.autoLogoutMinutes)
         if (res?.autoLogoutMinutes) {
           localStorage.setItem("comesFromEntry", "true");
         }
