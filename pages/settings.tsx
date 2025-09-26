@@ -18,7 +18,7 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
-import { AutoLogoutProgressBar } from "@/submodules/react-components/components/AutoLogoutProgressBar"
+import AutoLogoutProgressBar from "@/submodules/react-components/components/AutoLogoutProgressBar"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -40,7 +40,6 @@ const Settings: NextPage = () => {
   const [showAuthenticator, setShowAuthenticator] = useState<boolean>(false);
   const [loadPage, setLoadPage] = useState<boolean>(false);
   const [canShow, setCanShow] = useState<boolean>(false);
-  const autoLogoutRef = useRef(null);
 
   useEffect(() => {
     if (loadPage) return;
@@ -82,26 +81,6 @@ const Settings: NextPage = () => {
   useEffect(() => {
     refetchAdminMessagesAndProcess();
   }, []);
-
-  useEffect(() => {
-    const resetTimer = () => {
-      autoLogoutRef.current?.resetTimer();
-    }
-    const onKeyDownEvent = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      // used for the chat input (we want to trigger rest on typing)
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
-        resetTimer();
-      }
-    };
-    window.addEventListener("click", resetTimer);
-    window.addEventListener("keydown", onKeyDownEvent)
-    return () => {
-      window.removeEventListener("click", resetTimer);
-      window.removeEventListener("keydown", onKeyDownEvent)
-    };
-  }, []);
-
 
   const handleWebsocketNotification = useCallback((msgParts: string[]) => {
     if (msgParts[1] == 'admin_message') {
@@ -358,7 +337,7 @@ const Settings: NextPage = () => {
       </div>
       <div className="img-container">
       </div>
-      {(language && loadPage) && <AutoLogoutProgressBar ref={autoLogoutRef} className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} label={t("overview.remainingTime")} comesFromEntry={true} />}
+      {(language && loadPage) && <AutoLogoutProgressBar className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} label={t("overview.remainingTime")} comesFromEntry={true} />}
       <AdminMessages
         adminMessages={activeAdminMessages}
         setActiveAdminMessages={setActiveAdminMessages} />
