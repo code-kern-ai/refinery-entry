@@ -259,3 +259,7 @@ button.button-sign-in:focus {
 .hidden {
     display: none !important;
 }
+
+.top-2 {
+    top: 24px !important;
+}

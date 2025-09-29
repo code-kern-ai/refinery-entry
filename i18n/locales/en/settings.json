@@ -15,5 +15,8 @@
     "firstName": "First Name",
     "lastName": "Last Name",
     "password": "Password",
-    "save": "Save"
+    "save": "Save",
+    "overview": {
+        "remainingTime": "Remaining time before auto logout"
+    }
 }

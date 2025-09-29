@@ -15,5 +15,8 @@
     "firstName": "Voornaam",
     "lastName": "Achternaam",
     "password": "Wachtwoord",
-    "save": "Redden"
+    "save": "Redden",
+    "overview": {
+        "remainingTime": "Verbleibende tijd voor automatische afmelding"
+    }
 }

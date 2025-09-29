@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { Flow, Messages } from "../pkg"
 import { handleFlowError } from "../pkg/errors"
@@ -18,6 +18,7 @@ import { AdminMessage } from "@/submodules/react-components/types/admin-messages
 import { postProcessAdminMessages } from "@/submodules/react-components/helpers/admin-messages-helper"
 import AdminMessages from "@/submodules/react-components/components/AdminMessages"
 import { useTranslation } from "react-i18next"
+import AutoLogoutProgressBar from "@/submodules/react-components/components/AutoLogoutProgressBar"
 
 const Settings: NextPage = () => {
   const [initialFlow, setInitialFlow]: any = useState<SettingsFlow>()
@@ -70,6 +71,9 @@ const Settings: NextPage = () => {
           WebSocketsService.initWsNotifications();
         }
         setLanguage(res?.languageDisplay);
+        if (res?.autoLogoutMinutes) {
+          localStorage.setItem("comesFromEntry", "true");
+        }
       }
     });
   }, []);
@@ -333,6 +337,7 @@ const Settings: NextPage = () => {
       </div>
       <div className="img-container">
       </div>
+      {(language && loadPage) && <AutoLogoutProgressBar className='absolute right-2 top-2' autoLogoutMinutes={user?.autoLogoutMinutes} label={t("overview.remainingTime")} comesFromEntry={true} />}
       <AdminMessages
         adminMessages={activeAdminMessages}
         setActiveAdminMessages={setActiveAdminMessages} />
