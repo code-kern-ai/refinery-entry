@@ -20,6 +20,7 @@ const Login: NextPage = () => {
   const [selectedRole, setSelectedRole] = useState<string | undefined>('engineer');
   const [isAccLinkageRequested, setIsAccLinkageRequested] = useState(false);
   const [totpFlow, setTotpFlow] = useState<LoginFlow>();
+  const [displayMailForm, setDisplayMailForm] = useState(false);
   // Get ?flow=... from the URL
   const router = useRouter()
   const {
@@ -136,13 +137,19 @@ const Login: NextPage = () => {
           </p>
           <div className="ui-container">
             <div>
-              <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />
-              {oidcFlow ?
+              {displayMailForm && <Flow onSubmit={onSubmit} flow={changedFlow} only="password" />}
+              <div className="button-wrapper">
+                {displayMailForm ?
+                  <button className="button" name="mail" value="Mail"
+                    onClick={() => setDisplayMailForm(false)}>Go back</button> :
+                  <button className="button" name="mail" value="Mail"
+                    onClick={() => setDisplayMailForm(true)}>Sign in with Mail</button>}
+              </div>
+              {oidcFlow && !displayMailForm ?
                 <>
-                  <div className="divider-outer"><span className="divider">Or</span></div>
                   <Flow onSubmit={onSubmit} flow={oidcFlow} only="oidc" />
                 </> : null}
-              {totpFlow ?
+              {totpFlow && !displayMailForm ?
                 <>
                   <Flow onSubmit={onSubmit} flow={totpFlow} only="totp" />
                 </> : null}
@@ -151,7 +158,9 @@ const Login: NextPage = () => {
           <div className="link-container">
             {
               !isAccLinkageRequested ?
-                <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a>
+                <>
+                  {displayMailForm ? <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a> : null}
+                </>
                 : <a className="link" data-testid="back-to-login" href="/auth/login">Go back to login</a>
             }
           </div>
