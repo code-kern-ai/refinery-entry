@@ -83,13 +83,15 @@ button[name="lookup_secret_regenerate"] {
     background-color: #2f7241 !important;
 }
 
-button[name="provider"] {
+button[name="provider"],
+button[name="mail"] {
     background-color: white !important;
     color: rgb(69, 69, 69) !important;
     border: 1px rgb(209 213 219) solid !important;
 }
 
-button[name="provider"]:hover {
+button[name="provider"]:hover,
+button[name="mail"]:hover {
     border-color: #5AB370 !important;
     background-color: rgb(251, 251, 251) !important;
     transition: all 0.1s ease-in-out;
@@ -262,4 +264,23 @@ button.button-sign-in:focus {
 
 .top-2 {
     top: 24px !important;
+}
+
+.button-wrapper {
+    text-rendering: geometricPrecision;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.button {
+    line-height: 20px;
+    border-radius: 4px;
+    width: 100%;
+    padding: 5px 12px;
+    margin: 7px 0;
+    outline: none;
+    cursor: pointer;
 }
