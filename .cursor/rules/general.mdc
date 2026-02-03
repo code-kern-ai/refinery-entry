@@ -1,30 +1,35 @@
 ---
-description: General coding conventions and style guide for the Cognition UI project
+description: General coding conventions and style guide for the Refinery Entry project
 alwaysApply: true
 globs:
   - "*"
 ---
 
-# Cognition UI - General Guidelines
+# Refinery Entry - General Guidelines
 
 ## Project Overview
 
 This is a Next.js application with shared code in git submodules:
-- `submodules/react-components/` - Shared UI components and hooks
+- `submodules/react-components/` - Shared UI components and hooks (**⚠️ DO NOT use components from this submodule**)
 - `submodules/javascript-functions/` - Utility functions
 - `submodules/tailwind-config/` - Shared Tailwind configuration
+
+**⚠️ IMPORTANT: This repository should NOT import or use components from the `react-components` submodule.**
 
 ## Directory Structure
 
 ```
-src/
-├── components/     # Application-specific components
-├── pages/          # Next.js pages
-├── services/       # API service functions
-├── reduxStore/     # Redux state management
-├── util/           # Application-specific utilities
-├── i18n/           # Internationalization files
-└── styles/         # Global styles
+/
+├── pkg/            # Package code (UI components, SDK, hooks)
+│   ├── ui/         # UI components (NodeInput*, Flow, Messages, etc.)
+│   ├── sdk/        # SDK integration
+│   └── hooks.tsx   # Custom hooks
+├── pages/           # Next.js pages (login, settings, registration, etc.)
+├── util/            # Application-specific utilities
+│   ├── data-fetch.ts
+│   └── helper-functions.ts
+├── i18n/            # Internationalization files
+└── styles/          # Global styles (tailwind.css)
 ```
 
 ## Code Style
@@ -34,13 +39,18 @@ src/
 Always use the `@/` alias for imports:
 
 ```typescript
-// Submodule imports
-import KernButton from "@/submodules/react-components/components/kern-button/KernButton";
+// ✅ OK - Utility functions from submodules
 import { combineClassNames } from "@/submodules/javascript-functions/general";
-import { MemoIconCheck } from "@/submodules/react-components/components/kern-icons/icons";
 
-// App imports
-import { useAppSelector } from "@/src/reduxStore/store";
+// ✅ OK - Hooks from react-components (but NOT components)
+import { useDebouncedState } from "@/submodules/react-components/hooks/useDebouncedState";
+
+// ❌ DO NOT - Components from react-components should NOT be imported
+// import KernButton from "@/submodules/react-components/components/kern-button/KernButton";
+
+// ✅ OK - App-specific imports
+import { prepareNodes } from "@/util/helper-functions";
+import { Flow, Messages } from "@/pkg";
 ```
 
 ### CSS Classes
@@ -77,51 +87,30 @@ Service functions in `src/services/` handle API requests using the fetch wrapper
 ### Request Structure
 
 ```typescript
+// util/data-fetch.ts
 import { FetchType, jsonFetchWrapper } from "@/submodules/javascript-functions/basic-fetch";
-import { BACKEND_BASE_URI, REFINERY_BASE_URI } from "@/src/services/_settings";
-import { jsonFetchWrapperWithOrgCheck } from "@/src/services/orgIdCheckWrapper";
 
 // Define URL constants at the top
-const url = `${BACKEND_BASE_URI}/api/v1/projects/`;
-const refineryUrl = `${REFINERY_BASE_URI}/api/v1/organization`;
+const BACKEND_BASE_URI = '/refinery-gateway';
+export const organizationEndpoint = `${BACKEND_BASE_URI}/api/v1/organization`;
 
 // GET request
-export function getProjects(onResult: (result: any) => void, onError?: (response: any) => void) {
-    const finalUrl = url;
+export function getUserInfoExtended(onResult: (result: any) => void) {
+    const finalUrl = `${organizationEndpoint}/get-user-info-extended`;
+    jsonFetchWrapper(finalUrl, FetchType.GET, onResult);
+}
+
+// GET request with error handling
+export function getAllActiveAdminMessages(onResult: (result: any) => void, onError?: (response: any) => void) {
+    const finalUrl = `${organizationEndpoint}/all-active-admin-messages`;
     jsonFetchWrapper(finalUrl, FetchType.GET, onResult, undefined, undefined, onError);
 }
 
-// POST request with body
-export function createProject(name: string, description: string, onResult: (result: any) => void, onError?: (response: any) => void) {
-    const finalUrl = url;
-    const body = JSON.stringify({ name, description });
+// POST request example (if needed)
+export function createItem(data: any, onResult: (result: any) => void, onError?: (response: any) => void) {
+    const finalUrl = `${organizationEndpoint}/items`;
+    const body = JSON.stringify(data);
     jsonFetchWrapper(finalUrl, FetchType.POST, onResult, body, undefined, onError);
-}
-
-// PUT request with body
-export function updateProject(id: string, updateData: any, onResult: (result: any) => void, onError?: (response: any) => void) {
-    const finalUrl = `${url}${id}`;
-    const body = JSON.stringify(updateData);
-    jsonFetchWrapper(finalUrl, FetchType.PUT, onResult, body, undefined, onError);
-}
-
-// DELETE request
-export function deleteProject(id: string, onResult: (result: any) => void, onError?: (response: any) => void) {
-    const finalUrl = `${url}${id}`;
-    jsonFetchWrapper(finalUrl, FetchType.DELETE, onResult, undefined, undefined, onError);
-}
-
-// DELETE request with body
-export function deleteManyProjects(ids: string[], onResult: (result: any) => void, onError?: (response: any) => void) {
-    const finalUrl = `${url}many`;
-    const body = JSON.stringify({ ids });
-    jsonFetchWrapper(finalUrl, FetchType.DELETE, onResult, body, undefined, onError);
-}
-
-// Using org check wrapper (for requests that need org ID validation)
-export function getOrgProjects(onResult: (result: any) => void) {
-    const finalUrl = `${refineryUrl}/projects`;
-    jsonFetchWrapperWithOrgCheck(finalUrl, FetchType.GET, onResult);
 }
 ```
 
@@ -129,12 +118,15 @@ export function getOrgProjects(onResult: (result: any) => void) {
 - Use `jsonFetchWrapper` for JSON responses, `textFetchWrapper` for text responses
 - Parameters: `(url, FetchType, onResult, body?, headers?, onError?)`
 - Always stringify request bodies: `JSON.stringify({ ... })`
-- Use `jsonFetchWrapperWithOrgCheck` when org ID validation is needed
 - Define URL constants at the top of the file
 - Include `onError` callback for error handling when needed
+- Service functions should be placed in `util/` directory (e.g., `util/data-fetch.ts`)
 
 ## Before Creating New Code
 
-1. **Check submodules first** - Components, hooks, and utilities likely already exist
-2. **Follow existing patterns** - Look at similar files in `src/components/` and `src/services/`
-3. **Use shared components** - Prefer `KernButton`, `KernDropdown`, `KernTable` over custom implementations
+1. **Check submodules first** - Hooks and utilities likely already exist
+2. **⚠️ DO NOT use react-components** - Create your own components instead of importing from `react-components`
+3. **Follow existing patterns** - Look at similar files in `pkg/ui/` and `pages/` for component patterns
+4. **Use Tailwind CSS** - Style components using Tailwind classes (see `styles/tailwind.css`)
+5. **For Ory flows** - Use `@ory/themes` Button component (see `pkg/ui/NodeInput*.tsx`)
+6. **For general UI** - Use native HTML elements with Tailwind classes

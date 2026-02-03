@@ -7,6 +7,9 @@ globs:
 
 # Common Mistakes to Avoid
 
+**⚠️ IMPORTANT: This repository should NOT use components from the `react-components` submodule.**
+**Examples in this file show patterns and best practices, but do NOT import components from `react-components`.**
+
 These patterns have been identified from code reviews and hotfixes. Always check for these issues.
 
 ---
@@ -24,12 +27,12 @@ import { IconFileWord, IconCheck } from "@tabler/icons-react";
 ```
 
 ```typescript
-// GOOD
+// GOOD - Icons are allowed from react-components (they're utilities, not UI components)
 import { MemoIconFileWord, MemoIconCheck } from "@/submodules/react-components/components/kern-icons/icons";
 <MemoIconFileWord className="h-4 w-4" />
 ```
 
-**Rule:** Always use `MemoIcon*` from `kern-icons/icons.ts`. If an icon isn't available, add it there first with `memo()`.
+**Rule:** Always use `MemoIcon*` from `kern-icons/icons.ts`. Icons are an exception - they can be imported from react-components as they're utility components. If an icon isn't available, add it there first with `memo()`.
 
 ### 2. Wrap Event Handlers in useCallback
 
@@ -37,11 +40,11 @@ import { MemoIconFileWord, MemoIconCheck } from "@/submodules/react-components/c
 
 ```typescript
 // BAD - new function reference every render
-<KernButton onClick={() => dispatch(openModal(ModalEnum.SETTINGS))} />
+<button onClick={() => dispatch(openModal(ModalEnum.SETTINGS))} />
 
 // BAD - function defined in render without useCallback
 const handleClick = () => dispatch(openModal(ModalEnum.SETTINGS));
-<KernButton onClick={handleClick} />
+<button onClick={handleClick} />
 ```
 
 ```typescript
@@ -50,7 +53,7 @@ const handleClick = useCallback(() => {
     dispatch(openModal(ModalEnum.SETTINGS));
 }, [dispatch]);
 
-<KernButton onClick={handleClick} />
+<button onClick={handleClick} />
 ```
 
 ### 3. Memoize Components with memo()
@@ -312,12 +315,16 @@ useEffect(() => {
 
 ```typescript
 // BAD - local duplicate
-import { StrategyStepType } from "@/src/util/enums";
+// enum StrategyStepType { ... }
 ```
 
 ```typescript
-// GOOD - shared source of truth
+// GOOD - shared source of truth (if exists in submodules)
 import { StrategyStepType } from "@/submodules/javascript-functions/enums/enums";
+
+// OR create in util/ if repo-specific
+// util/enums.ts
+export enum StrategyStepType { ... }
 ```
 
 ### 15. Use Existing Types
@@ -325,21 +332,28 @@ import { StrategyStepType } from "@/submodules/javascript-functions/enums/enums"
 **Problem:** Recreating types that already exist.
 
 ```typescript
-// BAD
+// BAD - duplicate type definition
 type MyStrategy = { id: string; name: string; steps: any[] };
 ```
 
 ```typescript
-// GOOD
-import { Strategy } from "@/src/services/strategies";
+// GOOD - reuse existing types or define in appropriate location
+// If type exists in util/, import it
+import { Strategy } from "@/util/types";
+
+// OR define in util/types.ts if repo-specific
+// util/types.ts
+export type Strategy = { id: string; name: string; steps: StrategyStep[] };
 ```
 
 ### 16. Use Existing Components
 
-**Problem:** Rebuilding components that exist in submodules.
+**Problem:** Rebuilding components that exist in this repository.
+
+**⚠️ NOTE: This repository should NOT use components from `react-components` submodule.**
 
 ```typescript
-// BAD - custom implementation
+// BAD - custom implementation when pattern exists
 <div className="flex items-center">
     <Switch checked={value} onChange={onChange} />
     <span>{label}</span>
@@ -347,12 +361,25 @@ import { Strategy } from "@/src/services/strategies";
 ```
 
 ```typescript
-// GOOD - use submodule component
-import SwitchWithLabel from "@/submodules/react-components/components/SwitchWithLabel";
-<SwitchWithLabel checked={value} onChange={onChange} label={label} />
+// GOOD - check existing patterns in pkg/ui/ or pages/ first
+// If component doesn't exist, create it following repository patterns
+// Use Tailwind CSS classes and combineClassNames utility
+const handleToggle = useCallback(() => {
+    setIsEnabled(prev => !prev);
+}, []);
+
+<button 
+    className={combineClassNames(
+        "flex items-center gap-2",
+        isEnabled && "bg-green-500"
+    )}
+    onClick={handleToggle}
+>
+    <span>{label}</span>
+</button>
 ```
 
-**Check submodules for:** buttons, dropdowns, tables, switches, badges, modals, loading indicators.
+**Check existing code for patterns:** Look in `pkg/ui/` and `pages/` for similar components before creating new ones.
 
 ### 17. Use `T[]` Not `Array<T>`
 

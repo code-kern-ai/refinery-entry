@@ -5,7 +5,10 @@ globs:
   - "*"
 ---
 
-# Shared UI Components
+# UI Components
+
+**⚠️ IMPORTANT: This repository should NOT use components from the `react-components` submodule.**
+**This file documents component patterns and structure only, not for importing from submodules.**
 
 Always check `submodules/react-components/` before creating new components.
 
@@ -164,8 +167,8 @@ function MyComponent({ data }: MyComponentProps) {
 }
 
 // ✅ GOOD - Imported from existing types
-import { DataItem } from "@/src/services/data";
-import { ItemConfig } from "@/src/types/config";
+import { DataItem } from "@/util/data-fetch";
+import { NodeInputProps } from "@/pkg/ui/helpers";
 
 function processData(data: DataItem[]) {
   return data.map(item => item.value);
@@ -255,181 +258,105 @@ const router = useRouter();
 
 ## Buttons
 
-### KernButton
+### Creating Buttons in This Repository
 
-Main customizable button component.
+**⚠️ DO NOT import button components from `react-components` submodule.**
+
+This repository uses different button patterns depending on the context:
+
+#### 1. Ory Integration Buttons
+
+For Ory flow components (authentication, settings), use the `Button` component from `@ory/themes`:
 
 ```typescript
-import KernButton from "@/submodules/react-components/components/kern-button/KernButton";
-import { MemoIconDeviceFloppy } from "@/submodules/react-components/components/kern-icons/icons";
+import { Button } from "@ory/themes";
 
-<KernButton
-  text="Save"
-  icon={MemoIconDeviceFloppy}
-  iconColor="green"
-  buttonColor="green"
-  size="medium"           // 'small' | 'medium' | 'large' | 'solid-large'
-  loading={isLoading}
+<Button
+  name={attributes.name}
+  onClick={handleClick}
+  value={attributes.value || ""}
+  disabled={attributes.disabled || isDisabled}
+>
+  Button Text
+</Button>
+```
+
+**Usage:** Used in `pkg/ui/NodeInputButton.tsx`, `NodeInputSubmit.tsx`, `NodeAnchor.tsx`
+
+#### 2. Native HTML Buttons with Tailwind Classes
+
+For general-purpose buttons, use native `<button>` elements with Tailwind CSS classes:
+
+```typescript
+import { combineClassNames } from "@/submodules/javascript-functions/general";
+
+// Simple button
+<button 
+  className="button"
+  onClick={handleClick}
   disabled={isDisabled}
-  tooltip="Save changes"
-  confirm={true}          // Shows checkmark briefly after click
-  onClick={handleSave}    // should be wrapped in useCallback
-/>
+>
+  Button Text
+</button>
+
+// Link-style button
+<button 
+  className={combineClassNames(
+    "link",
+    isDisabled && "disabled:opacity-50 disabled:cursor-not-allowed"
+  )}
+  onClick={handleClick}
+  disabled={isDisabled}
+>
+  Back
+</button>
 ```
 
-**Props:**
-- `text?: string` - Button text
-- `icon?: (props) => any` - Tabler icon component
-- `iconColor?: string` - Tailwind color name
-- `buttonColor?: string` - Tailwind color name
-- `solidTheme?: boolean` - Use solid background
-- `size?: 'small' | 'medium' | 'large' | 'solid-large'`
-- `loading?: boolean` - Show spinner
-- `disabled?: boolean`
-- `tooltip?: string`
-- `confirm?: boolean` - Show checkmark after click
-- `fullWidth?: boolean`
+**Available CSS classes:**
+- `.button` - Standard button styling (see `styles/tailwind.css`)
+- `.link` - Link-style button for navigation actions
+- `.button-wrapper` - Container for button groups
 
-**Other buttons:** `IconButton`, `ButtonAsText`, `SaveButton`
+**Best Practices:**
+- Always wrap `onClick` handlers in `useCallback` for performance
+- Use `combineClassNames` for conditional classes
+- Follow disabled state patterns: `disabled={isDisabled}` with appropriate classes
+- For Ory-specific flows, use `@ory/themes` Button component
+- For general UI, use native buttons with Tailwind classes
 
-## Tables
-
-### KernTable
-
-Feature-rich table with sorting and multiple cell types.
-
+**Example from codebase:**
 ```typescript
-import KernTable from "@/submodules/react-components/components/kern-table/KernTable";
-
-// Define stable references outside render or with useMemo
-const HEADERS = [
-    { id: 'name', column: 'Name', hasSort: true },
-    { id: 'status', column: 'Status' },
-    { id: 'actions', column: 'Actions' }
-];
-
-// In component - memoize values that include callbacks
-const tableValues = useMemo(() => [
-    [
-      { type: 'text', value: 'Item 1' },
-      { type: 'Component', component: 'BadgeCell', value: true },
-      { type: 'Component', component: 'DeleteCell', deleteEntity: handleDelete }
-    ]
-], [handleDelete]);
-
-const config = useMemo(() => ({ sortKey: sortState, onClickSort: handleSort, noEntriesText: 'No items found' }), [sortState, handleSort]);
-
-<KernTable headers={HEADERS} values={tableValues} config={config} />
+// pages/settings.tsx
+<button 
+  className="link disabled:opacity-50 disabled:cursor-not-allowed" 
+  data-testid="forgot-password" 
+  disabled={backButtonDisabled} 
+  onClick={() => router.push("/cognition")}
+>
+  {t('back')}
+</button>
 ```
 
-**Cell Components:**
-- `BadgeCell` - Yes/No badge
-- `DeleteCell` - Delete button
-- `ViewCell` - View button
-- `IconCell` - Icon display
-- `LinkCell` - External link
-- `TruncateAndTooltipCell` - Truncated text with tooltip
-- `TaskStateCell` - Colored status badge
-- `@provided@` - Custom JSX via `jsx` prop
+## Creating New Components
 
-## Dropdowns
+When creating new components in this repository:
 
-### KernDropdown
+1. **DO NOT import from `react-components` submodule** - Create your own components instead
+2. **Follow the component structure patterns** outlined above (helper files, type definitions, etc.)
+3. **Use Tailwind CSS** for styling - check `styles/tailwind.css` for existing patterns
+4. **Use `combineClassNames`** utility for conditional classes
+5. **Wrap event handlers in `useCallback`** for performance
+6. **Define constants outside components** to prevent unnecessary re-renders
 
-Advanced dropdown with search, checkboxes, multi-select.
+### Component Examples in This Repository
 
-```typescript
-import KernDropdown from "@/submodules/react-components/components/KernDropdown";
+- **Ory Flow Components:** `pkg/ui/NodeInput*.tsx` - Use `@ory/themes` Button
+- **Custom Components:** `pkg/ui/Icons.tsx` - Custom SVG components
+- **Page Components:** `pages/*.tsx` - Use native HTML elements with Tailwind classes
 
-// Define options outside component or useMemo
-const OPTIONS = ['Option 1', 'Option 2', 'Option 3'];
+### When You Need a Component
 
-// In component - wrap handler in useCallback
-const handleSelect = useCallback((option) => {
-    // handle selection
-}, []);
-
-<KernDropdown
-  options={OPTIONS}
-  buttonName="Select..."
-  selectedOption={handleSelect}
-  hasSearchBar={true}
-  hasCheckboxes={true}
-  hasSelectAll={true}
-  dropdownWidth="w-64"
-  scrollAfterNOptions={5}
-  disabled={false}
-/>
-```
-
-**Key Props:**
-- `options: any[]` - Dropdown options
-- `buttonName: string` - Closed state text
-- `selectedOption: (option) => void` - Selection callback
-- `hasSearchBar?: boolean` - Enable search
-- `hasCheckboxes?: boolean` - Multi-select mode
-- `hasSelectAll?: boolean` - Add "select all"
-- `scrollAfterNOptions?: number` - Enable scrolling
-- `tooltipsArray?: string[]` - Per-option tooltips
-- `iconsArray?: string[]` - Per-option icons
-
-## Other Components
-
-### Badges
-
-```typescript
-import { KernBadge, ActiveBadge, InactiveBadge, NotApplicableBadge } from "@/submodules/react-components/components/Badges";
-```
-
-### CopyToClipboard
-
-```typescript
-import CopyToClipboard from "@/submodules/react-components/components/CopyToClipboard";
-
-<CopyToClipboard nameToCopy="text to copy" />
-```
-
-### LoadingIcon
-
-```typescript
-import LoadingIcon from "@/submodules/react-components/components/LoadingIcon";
-
-<LoadingIcon color="green" size="large" />
-```
-
-### SwitchWithLabel
-
-```typescript
-import SwitchWithLabel from "@/submodules/react-components/components/SwitchWithLabel";
-
-// Wrap handler in useCallback
-const handleToggle = useCallback(() => {
-    setIsEnabled(prev => !prev);
-}, []);
-
-<SwitchWithLabel
-  checked={isEnabled}
-  onChange={handleToggle}
-  label="Enable feature"
-  tooltip="Optional warning tooltip"
-/>
-```
-
-### SVGIcon
-
-Dynamic icon component for Tabler icons.
-
-```typescript
-import SVGIcon from "@/submodules/react-components/components/SVGIcon";
-
-<SVGIcon icon="IconSettings" size={24} strokeWidth={2} />
-```
-
-### Other Available Components
-
-- `Pagination` - Page navigation
-- `NoTableEntriesYet` - Empty table state
-- `MultilineTooltipAuto` - Multi-line tooltips
-- `InputWithSlider` - Slider input
-- `InputWithClearIcon` - Clearable input
-- `AdminMessages` / `AppNotifications` - System messages
+1. Check if a similar pattern exists in `pkg/ui/` or `pages/`
+2. Create a new component following the structure guidelines above
+3. Use Tailwind CSS classes from `styles/tailwind.css` or create new ones
+4. Document component props and usage in code comments
