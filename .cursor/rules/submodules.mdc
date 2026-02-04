@@ -1,0 +1,92 @@
+---
+description: Overview of shared submodules and their contents
+alwaysApply: true
+globs:
+  - "*"
+---
+
+# Submodules Overview
+
+This project uses three git submodules for shared code. **Always check submodules first** before creating new components, hooks, or utilities.
+
+## react-components
+
+**Path:** `submodules/react-components/`
+
+Shared UI components, hooks, and types used across projects.
+
+**⚠️ IMPORTANT: This repository should NOT use components from the `react-components` submodule.**
+
+**What CAN be used:**
+- Hooks (see `.cursor/rules/hooks.mdc`)
+- Utility functions and helpers (e.g., `postProcessAdminMessages`)
+- Type definitions (when needed)
+- Icons (`MemoIcon*` from `kern-icons/icons.ts` - see common-mistakes.mdc)
+
+**What CANNOT be used:**
+- UI Components (buttons, tables, dropdowns, badges, etc.)
+- Component-specific utilities
+
+**⚠️ EXCEPTIONS (Legacy/System Components):**
+The following components are currently imported but should be considered for replacement:
+- `AdminMessages` - System notification component
+- `AutoLogoutProgressBar` - System logout progress indicator
+
+**Note:** These exceptions exist for system-level functionality. For new features, create your own components instead.
+
+**Documentation:**
+- **Usage:** `.cursor/rules/components.mdc` - Component patterns (for reference only, do not import)
+- **Hooks:** `.cursor/rules/hooks.mdc` - Hook usage guide
+- **Development:** `submodules/react-components/.cursor/rules/guidelines.mdc` - Development guidelines
+
+**Import pattern (hooks only):**
+```typescript
+// ✅ OK - Hooks can be imported
+import { useDebouncedState } from "@/submodules/react-components/hooks/useDebouncedState";
+
+// ❌ DO NOT - Components should NOT be imported
+// import KernButton from "@/submodules/react-components/components/kern-button/KernButton";
+```
+
+## javascript-functions
+
+**Path:** `submodules/javascript-functions/`
+
+Utility functions for data manipulation.
+
+**Documentation:**
+- **Usage:** `.cursor/rules/utilities.mdc` - Utility function usage guide
+- **Development:** `submodules/javascript-functions/.cursor/rules/guidelines.mdc` - Development guidelines and usage patterns
+
+**Import pattern:**
+```typescript
+import { combineClassNames } from "@/submodules/javascript-functions/general";
+```
+
+## tailwind-config
+
+**Path:** `submodules/tailwind-config/`
+
+Shared Tailwind CSS configuration.
+
+**Documentation:**
+- **Development:** `submodules/tailwind-config/.cursor/rules/guidelines.mdc` - Comprehensive Tailwind configuration guidelines
+
+**Usage:**
+The config is imported via presets in consuming applications:
+```javascript
+module.exports = {
+  presets: [
+    require('./submodules/tailwind-config/tailwind.config.js'),
+  ]
+}
+```
+
+## Best Practices
+
+1. **Always check submodules first** before creating new hooks or utilities
+2. **⚠️ DO NOT use react-components** - Components from `react-components` submodule should NOT be imported in this repository
+3. **Create your own components** - Follow patterns in `pkg/ui/` and use Tailwind CSS for styling
+4. **Hooks and utilities** - Can be imported from submodules (see `.cursor/rules/hooks.mdc` and `.cursor/rules/utilities.mdc`)
+5. **Don't duplicate** - If hooks or utilities exist in submodules, use them
+6. **Submodule changes affect multiple projects** - Be careful when modifying submodules

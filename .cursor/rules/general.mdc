@@ -1,0 +1,132 @@
+---
+description: General coding conventions and style guide for the Refinery Entry project
+alwaysApply: true
+globs:
+  - "*"
+---
+
+# Refinery Entry - General Guidelines
+
+## Project Overview
+
+This is a Next.js application with shared code in git submodules:
+- `submodules/react-components/` - Shared UI components and hooks (**⚠️ DO NOT use components from this submodule**)
+- `submodules/javascript-functions/` - Utility functions
+- `submodules/tailwind-config/` - Shared Tailwind configuration
+
+**⚠️ IMPORTANT: This repository should NOT import or use components from the `react-components` submodule.**
+
+## Directory Structure
+
+```
+/
+├── pkg/            # Package code (UI components, SDK, hooks)
+│   ├── ui/         # UI components (NodeInput*, Flow, Messages, etc.)
+│   ├── sdk/        # SDK integration
+│   └── hooks.tsx   # Custom hooks
+├── pages/           # Next.js pages (login, settings, registration, etc.)
+├── util/            # Application-specific utilities
+│   ├── data-fetch.ts
+│   └── helper-functions.ts
+├── i18n/            # Internationalization files
+└── styles/          # Global styles (tailwind.css)
+```
+
+## Code Style
+
+### Import Conventions
+
+Always use the `@/` alias for imports:
+
+```typescript
+// ✅ OK - Utility functions from submodules
+import { combineClassNames } from "@/submodules/javascript-functions/general";
+
+// ✅ OK - Hooks from react-components (but NOT components)
+import { useDebouncedState } from "@/submodules/react-components/hooks/useDebouncedState";
+
+// ❌ DO NOT - Components from react-components should NOT be imported
+// import KernButton from "@/submodules/react-components/components/kern-button/KernButton";
+
+// ✅ OK - App-specific imports
+import { prepareNodes } from "@/util/helper-functions";
+import { Flow, Messages } from "@/pkg";
+```
+
+### CSS Classes
+
+Always use `combineClassNames` for conditional classes:
+
+```typescript
+// Good
+className={combineClassNames("base-class", isActive && "active-class")}
+
+// Avoid
+className={`base-class ${isActive ? "active-class" : ""}`}
+```
+
+### TypeScript
+
+- Use explicit types for function parameters and return values
+- Prefer interfaces over types for object shapes
+- Use `readonly` for immutable properties
+
+## Key Dependencies
+
+- **UI Framework**: React with Next.js
+- **Styling**: Tailwind CSS
+- **State**: Redux Toolkit
+- **Icons**: `@tabler/icons-react` (always use `MemoIcon*` wrappers from `kern-icons/icons.ts`)
+- **UI Primitives**: `@headlessui/react`
+- **Tooltips**: `@nextui-org/react`
+
+## Service Functions
+
+Service functions in `src/services/` handle API requests using the fetch wrapper pattern.
+
+### Request Structure
+
+```typescript
+// util/data-fetch.ts
+import { FetchType, jsonFetchWrapper } from "@/submodules/javascript-functions/basic-fetch";
+
+// Define URL constants at the top
+const BACKEND_BASE_URI = '/refinery-gateway';
+export const organizationEndpoint = `${BACKEND_BASE_URI}/api/v1/organization`;
+
+// GET request
+export function getUserInfoExtended(onResult: (result: any) => void) {
+    const finalUrl = `${organizationEndpoint}/get-user-info-extended`;
+    jsonFetchWrapper(finalUrl, FetchType.GET, onResult);
+}
+
+// GET request with error handling
+export function getAllActiveAdminMessages(onResult: (result: any) => void, onError?: (response: any) => void) {
+    const finalUrl = `${organizationEndpoint}/all-active-admin-messages`;
+    jsonFetchWrapper(finalUrl, FetchType.GET, onResult, undefined, undefined, onError);
+}
+
+// POST request example (if needed)
+export function createItem(data: any, onResult: (result: any) => void, onError?: (response: any) => void) {
+    const finalUrl = `${organizationEndpoint}/items`;
+    const body = JSON.stringify(data);
+    jsonFetchWrapper(finalUrl, FetchType.POST, onResult, body, undefined, onError);
+}
+```
+
+**Key patterns:**
+- Use `jsonFetchWrapper` for JSON responses, `textFetchWrapper` for text responses
+- Parameters: `(url, FetchType, onResult, body?, headers?, onError?)`
+- Always stringify request bodies: `JSON.stringify({ ... })`
+- Define URL constants at the top of the file
+- Include `onError` callback for error handling when needed
+- Service functions should be placed in `util/` directory (e.g., `util/data-fetch.ts`)
+
+## Before Creating New Code
+
+1. **Check submodules first** - Hooks and utilities likely already exist
+2. **⚠️ DO NOT use react-components** - Create your own components instead of importing from `react-components`
+3. **Follow existing patterns** - Look at similar files in `pkg/ui/` and `pages/` for component patterns
+4. **Use Tailwind CSS** - Style components using Tailwind classes (see `styles/tailwind.css`)
+5. **For Ory flows** - Use `@ory/themes` Button component (see `pkg/ui/NodeInput*.tsx`)
+6. **For general UI** - Use native HTML elements with Tailwind classes
