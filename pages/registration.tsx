@@ -22,7 +22,11 @@ const Registration: NextPage = () => {
 
 
   // Get ?flow=... from the URL
-  const { flow: flowId, return_to: returnTo } = router.query;
+  const {
+    flow: flowId,
+    return_to: returnTo,
+    login_challenge: loginChallenge,
+  } = router.query;
 
   // In this effect we either initiate a new registration flow, or we fetch an existing registration flow.
   useEffect(() => {
@@ -47,12 +51,13 @@ const Registration: NextPage = () => {
     ory
       .createBrowserRegistrationFlow({
         returnTo: returnTo ? String(returnTo) : undefined,
+        loginChallenge: loginChallenge ? String(loginChallenge) : undefined,
       })
       .then(({ data }) => {
         setInitialFlow(data)
       })
       .catch(handleFlowError(router, "registration", setInitialFlow))
-  }, [flowId, router, router.isReady, returnTo, initialFlow])
+  }, [flowId, router, router.isReady, returnTo, loginChallenge, initialFlow])
 
   useEffect(() => {
     if (!initialFlow) return;
@@ -97,6 +102,13 @@ const Registration: NextPage = () => {
       })
   }
 
+  const backToLoginQuery = new URLSearchParams({
+    ...(returnTo ? { return_to: String(returnTo) } : {}),
+    ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+  }).toString()
+  const backToLoginHref = `/auth/login${backToLoginQuery ? `?${backToLoginQuery}` : ""}`
+
+
   return (
     <>
       <Head>
@@ -117,7 +129,7 @@ const Registration: NextPage = () => {
           </div>
 
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
+            <a className="link" data-testid="forgot-password" href={backToLoginHref}>Go back to login</a>
           </div>
         </div>
       </div>

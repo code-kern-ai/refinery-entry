@@ -26,6 +26,7 @@ const Login: NextPage = () => {
   const {
     return_to: returnTo,
     flow: flowId,
+    login_challenge: loginChallenge,
     // Refresh means we want to refresh the session. This is needed, for example, when we want to update the password
     // of a user.
     refresh,
@@ -37,6 +38,36 @@ const Login: NextPage = () => {
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
     if (!router.isReady || initialFlow) {
+      return
+    }
+    // If there is a challenge, check for existing session first
+    if (loginChallenge) {
+      ory.toSession()
+        .then(({ data }) => {
+          // Active session exists — let the server accept the challenge
+          // without forcing re-auth
+          return fetch(`/api/login/accept`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              challenge: String(loginChallenge),
+              subject: data.identity.id,
+            }),
+          })
+        })
+        .then(res => res.json())
+        .then(({ redirect_to }) => { window.location.href = redirect_to })
+        .catch(() => {
+          // No session — proceed with normal flow creation
+          ory.createBrowserLoginFlow({
+            refresh: Boolean(refresh),
+            aal: aal ? String(aal) : undefined,
+            returnTo: returnTo ? String(returnTo) : undefined,
+            loginChallenge: String(loginChallenge),
+          })
+          .then(({ data }) => setInitialFlow(data))
+          .catch(handleFlowError(router, 'login', setInitialFlow))
+        })
       return
     }
     // If ?flow=.. was in the URL, we fetch it
@@ -55,12 +86,13 @@ const Login: NextPage = () => {
         refresh: Boolean(refresh),
         aal: aal ? String(aal) : undefined,
         returnTo: returnTo ? String(returnTo) : undefined,
+        loginChallenge: loginChallenge ? String(loginChallenge) : undefined,
       })
       .then(({ data }) => {
         setInitialFlow(data)
       })
       .catch(handleFlowError(router, "login", setInitialFlow))
-  }, [flowId, router, router.isReady, aal, refresh, returnTo, initialFlow])
+  }, [flowId, router, router.isReady, aal, refresh, returnTo, loginChallenge, initialFlow])
 
   useEffect(() => {
     if (!initialFlow) return;
@@ -121,6 +153,19 @@ const Login: NextPage = () => {
         return Promise.reject(err)
       })
 
+
+  const backToLoginQuery = new URLSearchParams({
+    ...(returnTo ? { return_to: String(returnTo) } : {}),
+    ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+  }).toString()
+  const backToLoginHref = `/auth/login${backToLoginQuery ? `?${backToLoginQuery}` : ""}`
+
+  const registrationQuery = new URLSearchParams({
+    ...(returnTo ? { return_to: String(returnTo) } : {}),
+    ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+  }).toString()
+  const registrationHref = `/auth/registration${registrationQuery ? `?${registrationQuery}` : ""}`
+
   return (
     <>
       <Head>
@@ -132,7 +177,7 @@ const Login: NextPage = () => {
         <div id="login">
           <h2 className="title">Sign in to your account</h2>
           <p className="text-paragraph">Or
-            <a className="link" data-testid="cta-link" href="/auth/registration"> Register account </a> -
+            <a className="link" data-testid="cta-link" href={registrationHref}> Register account </a> -
             no credit card required!
           </p>
           <div className="ui-container">
@@ -161,7 +206,7 @@ const Login: NextPage = () => {
                 <>
                   {displayMailForm ? <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a> : null}
                 </>
-                : <a className="link" data-testid="back-to-login" href="/auth/login">Go back to login</a>
+                : <a className="link" data-testid="back-to-login" href={backToLoginHref}>Go back to login</a>
             }
           </div>
         </div>
