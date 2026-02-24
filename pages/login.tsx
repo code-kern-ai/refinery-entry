@@ -42,11 +42,12 @@ const Login: NextPage = () => {
     }
     // If there is a challenge, check for existing session first
     if (loginChallenge) {
+
       ory.toSession()
         .then(({ data }) => {
           // Active session exists — let the server accept the challenge
           // without forcing re-auth
-          return fetch(`/api/login/accept`, {
+          return fetch(`/refinery-entry/api/login/accept`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -56,7 +57,9 @@ const Login: NextPage = () => {
           })
         })
         .then(res => res.json())
-        .then(({ redirect_to }) => { window.location.href = redirect_to })
+        .then(({ redirect_to }) => { 
+          console.log("Redirecting to:", redirect_to)
+          window.location.href =  redirect_to })
         .catch(() => {
           // No session — proceed with normal flow creation
           ory.createBrowserLoginFlow({
