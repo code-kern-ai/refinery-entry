@@ -2,11 +2,22 @@ import { OAuth2ConsentRequest, AcceptOAuth2ConsentRequestSession } from "@ory/cl
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { KernLogo } from "@/pkg/ui/Icons"
 import ory from "@/pkg/sdk"
 
 const REMEMBER_FOR_SECONDS = 3600
+
+const SCOPE_META: Record<string, { label: string; description: string }> = {
+  openid: { label: "OpenID", description: "Verify your identity" },
+  email: { label: "Email", description: "View your email address" },
+  profile: { label: "Profile", description: "View your basic profile info" },
+  offline_access: { label: "Offline access", description: "Stay signed in on your behalf" },
+}
+
+function getScopeMeta(scope: string) {
+  return SCOPE_META[scope] ?? { label: scope, description: "Access to " + scope }
+}
 
 const Consent: NextPage = () => {
   const router = useRouter()
@@ -17,6 +28,7 @@ const Consent: NextPage = () => {
   const [remember, setRemember] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
   const challenge = useMemo(
     () => (consentChallenge ? String(consentChallenge) : ""),
@@ -72,7 +84,6 @@ const Consent: NextPage = () => {
       .then(async (data: OAuth2ConsentRequest) => {
         const requestedScope = data.requested_scope || []
 
-        // skip=true means user already consented — accept immediately
         if (data.skip) {
           const session = await buildSession(requestedScope)
           return fetch('/refinery-entry/api/consent/accept', {
@@ -93,8 +104,12 @@ const Consent: NextPage = () => {
 
         setConsentRequest(data)
         setSelectedScopes(requestedScope)
+        setIsLoading(false)
       })
-      .catch(err => setErrorMessage(err.message ?? "Unable to load the consent request."))
+      .catch(err => {
+        setErrorMessage(err.message ?? "Unable to load the consent request.")
+        setIsLoading(false)
+      })
   }, [router.isReady, challenge, buildSession, remember])
 
   const handleScopeChange = useCallback((scope: string, checked: boolean) => {
@@ -154,6 +169,8 @@ const Consent: NextPage = () => {
     consentRequest?.client?.client_id ||
     "Unknown Client"
 
+  const clientInitial = clientName.charAt(0).toUpperCase()
+
   return (
     <>
       <Head>
@@ -164,41 +181,87 @@ const Consent: NextPage = () => {
         <KernLogo />
         <div id="consent">
           <h2 className="title">Authorize access</h2>
-          {!challenge && <p className="message error">Expected a consent challenge but received none.</p>}
+
+          {!challenge && !isLoading && (
+            <p className="message error">Expected a consent challenge but received none.</p>
+          )}
           {errorMessage && <p className="message error">{errorMessage}</p>}
+
+          {isLoading && challenge && !errorMessage && (
+            <div className="ui-container" style={{ textAlign: "center" }}>
+              <p className="text-paragraph">Loading consent request…</p>
+            </div>
+          )}
+
           {consentRequest && (
-            <form className="ui-container">
-              <p className="text-paragraph">
-                <strong>{clientName}</strong> is requesting access to your account.
-              </p>
+            <form className="ui-container" onSubmit={e => e.preventDefault()}>
+              <div className="consent-client-badge">
+                <span className="client-icon">{clientInitial}</span>
+                <div className="client-info">
+                  <span className="client-name">{clientName}</span>
+                  <span className="client-label">wants to access your account</span>
+                </div>
+              </div>
+
               {consentRequest.requested_scope && consentRequest.requested_scope.length > 0 && (
-                <div className="form-container mt-4">
-                  <h3 className="subtitle">Permissions</h3>
-                  {consentRequest.requested_scope.map(scope => (
-                    <label key={scope} className="text-paragraph block mt-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedScopes.includes(scope)}
-                        onChange={e => handleScopeChange(scope, e.target.checked)}
-                      />{" "}
-                      {scope}
-                    </label>
-                  ))}
+                <div className="form-container" style={{ marginTop: 20 }}>
+                  <p className="subtitle" style={{ marginBottom: 4 }}>Permissions</p>
+                  <p className="text-description" style={{ marginBottom: 0 }}>
+                    Select which permissions to grant
+                  </p>
+                  <div className="scope-list">
+                    {consentRequest.requested_scope.map(scope => {
+                      const meta = getScopeMeta(scope)
+                      const isChecked = selectedScopes.includes(scope)
+                      return (
+                        <label
+                          key={scope}
+                          className={`scope-item${isChecked ? " selected" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={e => handleScopeChange(scope, e.target.checked)}
+                          />
+                          <div>
+                            <div className="scope-label">{meta.label}</div>
+                            <div className="scope-description">{meta.description}</div>
+                          </div>
+                        </label>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
-              <label className="text-paragraph block mt-4">
+
+              <label className="remember-row">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={e => setRemember(e.target.checked)}
-                />{" "}
-                Remember this consent decision
+                />
+                <span className="remember-text">Remember this decision</span>
               </label>
-              <div className="button-wrapper mt-4">
-                <button className="button" type="button" onClick={handleAccept} disabled={isSubmitting}>
-                  Allow access
+
+              <div className="consent-btn-group">
+                <button
+                  className="consent-btn-primary"
+                  type="button"
+                  onClick={handleAccept}
+                  disabled={isSubmitting || selectedScopes.length === 0}
+                >
+                  {isSubmitting ? (
+                    <><span className="consent-spinner" />Processing…</>
+                  ) : (
+                    "Allow access"
+                  )}
                 </button>
-                <button className="button" type="button" onClick={handleReject} disabled={isSubmitting}>
+                <button
+                  className="consent-btn-secondary"
+                  type="button"
+                  onClick={handleReject}
+                  disabled={isSubmitting}
+                >
                   Deny access
                 </button>
               </div>

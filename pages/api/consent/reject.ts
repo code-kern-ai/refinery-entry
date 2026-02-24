@@ -1,5 +1,6 @@
 // pages/api/consent/reject.ts
 import hydra from '@/pkg/sdk/hydra'
+import ory from '@/pkg/sdk'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -12,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             error_description: 'The resource owner denied the request',
         },
     }).then(({ data }) => {
-        return res.json({ redirect_to: data.redirect_to })
+        return res.json({ redirect_to: '/' })
     }).catch((err: any) => {
         console.error(err?.response?.data ?? err.message)
         return res.status(500).json({ error: 'failed to reject consent request' })
