@@ -289,6 +289,18 @@ button.button-sign-in:focus {
     flex-shrink: 0;
 }
 
+.consent-client-badge .client-icon.client-icon--logo {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+}
+
+.consent-client-badge .client-icon .client-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
 .consent-client-badge .client-info {
     display: flex;
     flex-direction: column;

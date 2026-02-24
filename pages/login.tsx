@@ -9,8 +9,6 @@ import { Flow } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
 import { KernLogo } from "@/pkg/ui/Icons"
 
-import { DemoFlow } from "@/pkg/ui/DemoFlow"
-import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 import ory from "@/pkg/sdk"
 
 const Login: NextPage = () => {
@@ -57,9 +55,14 @@ const Login: NextPage = () => {
           })
         })
         .then(res => res.json())
-        .then(({ redirect_to }) => { 
-          console.log("Redirecting to:", redirect_to)
-          window.location.href =  redirect_to })
+        .then(({ redirect_to }) => {
+          const target = new URL(redirect_to, window.location.origin)
+          if (target.pathname === window.location.pathname && target.search === window.location.search) {
+            window.location.reload()
+          } else {
+            window.location.href = redirect_to
+          }
+        })
         .catch(() => {
           // No session — proceed with normal flow creation
           ory.createBrowserLoginFlow({

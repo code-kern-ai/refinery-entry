@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             error_description: 'The resource owner denied the request',
         },
     }).then(({ data }) => {
-        return res.json({ redirect_to: '/' })
+        return res.json({ redirect_to: data.redirect_to })
     }).catch((err: any) => {
         console.error(err?.response?.data ?? err.message)
         return res.status(500).json({ error: 'failed to reject consent request' })

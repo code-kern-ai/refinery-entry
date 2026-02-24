@@ -3,6 +3,7 @@ import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { combineClassNames } from "@/submodules/javascript-functions/general"
 import { KernLogo } from "@/pkg/ui/Icons"
 import ory from "@/pkg/sdk"
 
@@ -170,6 +171,11 @@ const Consent: NextPage = () => {
     "Unknown Client"
 
   const clientInitial = clientName.charAt(0).toUpperCase()
+  const clientLogoUri =
+    (consentRequest?.client as { logo_uri?: string } | undefined)?.logo_uri ||
+    (consentRequest?.client as { logo_url?: string } | undefined)?.logo_url ||
+    ""
+
 
   return (
     <>
@@ -196,7 +202,22 @@ const Consent: NextPage = () => {
           {consentRequest && (
             <form className="ui-container" onSubmit={e => e.preventDefault()}>
               <div className="consent-client-badge">
-                <span className="client-icon">{clientInitial}</span>
+                <span
+                  className={combineClassNames(
+                    "client-icon",
+                    clientLogoUri && "client-icon--logo",
+                  )}
+                >
+                  {clientLogoUri ? (
+                    <img
+                      src={clientLogoUri}
+                      alt={clientName}
+                      className="client-logo"
+                    />
+                  ) : (
+                    clientInitial
+                  )}
+                </span>
                 <div className="client-info">
                   <span className="client-name">{clientName}</span>
                   <span className="client-label">wants to access your account</span>
