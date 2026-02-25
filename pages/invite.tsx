@@ -1,4 +1,4 @@
-import { VerificationFlow, UpdateVerificationFlowBody } from "@ory/client"
+import { RecoveryFlow, UpdateRecoveryFlowBody } from "@ory/client"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
@@ -9,47 +9,47 @@ import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 
-const Verification: NextPage = () => {
+const InvitePage: NextPage = () => {
   const router = useRouter()
-  const { flow: flowId, invite } = router.query
-  const isInvite = invite === "true"
+  const { flow: flowId } = router.query
 
-  const [flow, setFlow] = useState<VerificationFlow | null>(null)
+  const [flow, setFlow] = useState<RecoveryFlow | null>(null)
 
   useEffect(() => {
     if (!router.isReady || !flowId) return
     ory
-      .getVerificationFlow({ id: String(flowId) })
+      .getRecoveryFlow({ id: String(flowId) })
       .then(({ data }) => {
         data.ui.nodes.forEach((node) => {
           const attrs = node.attributes as { name?: string }
           if (attrs.name === "code") {
             node.meta.label = { text: "Enter the code from your email", id: 0, type: "info" }
           }
+          if (attrs.name === "email") {
+            node.meta.label = { text: "Your email address", id: 0, type: "info" }
+          }
         })
         setFlow(data)
       })
-      .catch((err) => handleFlowError(router, "verification", setFlow)(err))
+      .catch((err) => handleFlowError(router, "recovery", setFlow)(err))
   }, [router.isReady, flowId])
 
-  const onSubmit = (values: UpdateVerificationFlowBody) =>
+  const onSubmit = (values: UpdateRecoveryFlowBody) =>
     router
-      .push(`${router.pathname}?flow=${flow?.id}${isInvite ? "&invite=true" : ""}`, undefined, {
-        shallow: true,
-      })
+      .push(`/invite?flow=${flow?.id}`, undefined, { shallow: true })
       .then(() =>
         ory
-          .updateVerificationFlow({
+          .updateRecoveryFlow({
             flow: String(flow?.id),
-            updateVerificationFlowBody: values,
+            updateRecoveryFlowBody: values,
           })
           .then(({ data }) => {
             setFlow(data)
             if (data.state === "passed_challenge") {
-              router.push(isInvite ? "/set-password?invite=true" : "/")
+              router.push("/set-password?invite=true")
             }
           })
-          .catch(handleFlowError(router, "verification", setFlow))
+          .catch(handleFlowError(router, "recovery", setFlow))
           .catch((err: any) => {
             if (err.response?.status === 400) {
               setFlow(err.response?.data)
@@ -64,15 +64,13 @@ const Verification: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{isInvite ? "Accept Invitation" : "Verify"}</title>
+        <title>Accept Invitation</title>
       </Head>
 
       <div className="app-container">
         <KernLogo />
-        <div id="verification">
-          <h2 className="title">
-            {isInvite ? "Accept Your Invitation" : "Verify your account"}
-          </h2>
+        <div id="invite">
+          <h2 className="title">Accept Your Invitation</h2>
 
           <Flow onSubmit={onSubmit} flow={flow} />
         </div>
@@ -81,4 +79,4 @@ const Verification: NextPage = () => {
   )
 }
 
-export default Verification
+export default InvitePage
