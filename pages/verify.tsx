@@ -11,8 +11,7 @@ import { KernLogo } from "@/pkg/ui/Icons"
 
 const Verification: NextPage = () => {
   const router = useRouter()
-  const { flow: flowId, invite } = router.query
-  const isInvite = invite === "true"
+  const { flow: flowId, state: flowState } = router.query
 
   const [flow, setFlow] = useState<VerificationFlow | null>(null)
 
@@ -21,20 +20,26 @@ const Verification: NextPage = () => {
     ory
       .getVerificationFlow({ id: String(flowId) })
       .then(({ data }) => {
+        if (flowState === "success") {
+          const returnTo = (data as VerificationFlow & { return_to?: string }).return_to
+          window.location.href = returnTo || "/cognition"
+          return
+        }
         data.ui.nodes.forEach((node) => {
-          const attrs = node.attributes as { name?: string }
+          const attrs = node.attributes as { name?: string; value?: string }
           if (attrs.name === "code") {
             node.meta.label = { text: "Enter the code from your email", id: 0, type: "info" }
+            attrs.value = ""
           }
         })
         setFlow(data)
       })
       .catch((err) => handleFlowError(router, "verification", setFlow)(err))
-  }, [router.isReady, flowId])
+  }, [router.isReady, flowId, flowState])
 
   const onSubmit = (values: UpdateVerificationFlowBody) =>
     router
-      .push(`${router.pathname}?flow=${flow?.id}${isInvite ? "&invite=true" : ""}`, undefined, {
+      .push(`${router.pathname}?flow=${flow?.id}`, undefined, {
         shallow: true,
       })
       .then(() =>
@@ -44,12 +49,16 @@ const Verification: NextPage = () => {
             updateVerificationFlowBody: values,
           })
           .then(({ data }) => {
-            setFlow(data)
-            if (data.state === "passed_challenge") {
-              router.push(isInvite ? "/set-password?invite=true" : "/")
-            }
+            const returnTo = (data as VerificationFlow & { return_to?: string }).return_to
+            window.location.href = returnTo || "/cognition"
           })
-          .catch(handleFlowError(router, "verification", setFlow))
+          .catch((err: any) => {
+            if (err.response?.data?.error?.id === "browser_location_change_required") {
+              window.location.href = "/cognition"
+              return
+            }
+            return handleFlowError(router, "verification", setFlow)(err)
+          })
           .catch((err: any) => {
             if (err.response?.status === 400) {
               setFlow(err.response?.data)
@@ -64,18 +73,20 @@ const Verification: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{isInvite ? "Accept Invitation" : "Verify"}</title>
+        <title>Verify</title>
       </Head>
 
       <div className="app-container">
         <KernLogo />
         <div id="verification">
           <h2 className="title">
-            {isInvite ? "Accept Your Invitation" : "Verify your account"}
+            Verify your account
           </h2>
 
           <Flow onSubmit={onSubmit} flow={flow} />
         </div>
+      </div>
+      <div className="img-container">
       </div>
     </>
   )
