@@ -45,7 +45,7 @@ const Login: NextPage = () => {
         .then(({ data }) => {
           // Active session exists — let the server accept the challenge
           // without forcing re-auth
-          return fetch(`/refinery-entry/api/login/accept`, {
+          return fetch(`/refinery-authorizer/hydra/login/accept`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

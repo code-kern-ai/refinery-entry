@@ -77,7 +77,7 @@ const Consent: NextPage = () => {
   useEffect(() => {
     if (!router.isReady || !challenge) return
 
-    fetch(`/refinery-entry/api/consent/get?challenge=${challenge}`)
+    fetch(`/refinery-authorizer/hydra/consent?challenge=${challenge}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch consent request")
         return res.json()
@@ -87,7 +87,7 @@ const Consent: NextPage = () => {
 
         if (data.skip) {
           const session = await buildSession(requestedScope)
-          return fetch('/refinery-entry/api/consent/accept', {
+          return fetch('/refinery-authorizer/hydra/consent/accept', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -125,7 +125,7 @@ const Consent: NextPage = () => {
     setErrorMessage("")
     try {
       const session = await buildSession(selectedScopes)
-      const res = await fetch('/refinery-entry/api/consent/accept', {
+      const res = await fetch('/refinery-authorizer/hydra/consent/accept', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -151,7 +151,7 @@ const Consent: NextPage = () => {
     setIsSubmitting(true)
     setErrorMessage("")
     try {
-      const res = await fetch('/refinery-entry/api/consent/reject', {
+      const res = await fetch('/refinery-authorizer/hydra/consent/reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ challenge }),
