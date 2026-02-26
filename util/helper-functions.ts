@@ -5,7 +5,7 @@ const customMessageOverridesEnglish = {
     1050001: "Your changes are saved!",
     '1050001a': "Your changes are saved! Please set your password to continue.",
     '1050001ab': "Your password has been set successfully! ",
-    4000032: "The password must be at least 8 characters long, but got less.",
+    4000032: "The password must be at least 10 characters long, but got less.",
     4000034: "The password has been found in data breaches and must no longer be used.",
     4060004: "This link is invalid, add your email below to receive a new one"
 };
@@ -17,7 +17,7 @@ const customMessageOverridesGerman = {
     1050001: "Ihre Änderungen wurden gespeichert!",
     '1050001a': "Ihre Änderungen wurden gespeichert! Bitte setzen Sie Ihr Passwort, um fortzufahren.",
     '1050001ab': "Ihr Passwort wurde erfolgreich gesetzt! ",
-    4000032: "Das Passwort muss mindestens 8 Zeichen lang sein, aber es wurden weniger als 8 Zeichen eingegeben.",
+    4000032: "Das Passwort muss mindestens 10 Zeichen lang sein, aber es wurden weniger als 10 Zeichen eingegeben.",
     4000034: "Das Passwort wurde in Datenpannen gefunden und darf nicht mehr verwendet werden.",
     4060004: "Dieser Link ist ungültig, geben Sie Ihre E-Mail unten ein, um einen neuen zu erhalten"
 }
@@ -29,7 +29,7 @@ const customMessageOverridesDutch = {
     1050001: "Uw wijzigingen zijn opgeslagen!",
     '1050001a': "Uw wijzigingen zijn opgeslagen! Stel uw wachtwoord in om verder te gaan.",
     '1050001ab': "Uw wachtwoord is succesvol ingesteld! ",
-    4000032: "Het wachtwoord moet minimaal 8 tekens lang zijn, maar er zijn minder dan 8 tekens ingevoerd.",
+    4000032: "Het wachtwoord moet minimaal 10 tekens lang zijn, maar er zijn minder dan 10 tekens ingevoerd.",
     4000034: "Het wachtwoord is gevonden in datalekken en mag niet meer worden gebruikt.",
     4060004: "Deze link is ongeldig, voeg uw e-mailadres hieronder toe om een nieuwe te ontvangen."
 }
