@@ -37,6 +37,7 @@ export function NodeInputButton<T>({
         }}
         value={attributes.value || ""}
         disabled={attributes.disabled || disabled}
+        formNoValidate
       >
         {getNodeLabel(node)}
       </Button>

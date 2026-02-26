@@ -11,8 +11,7 @@ import { KernLogo } from "@/pkg/ui/Icons"
 
 const Recovery: NextPage = () => {
   const router = useRouter()
-  const { flow: flowId, invite } = router.query
-  const isInvite = invite === "true"
+  const { flow: flowId } = router.query
 
   const [flow, setFlow] = useState<RecoveryFlow>()
 
@@ -27,22 +26,26 @@ const Recovery: NextPage = () => {
           data = res.data
         } else {
           const res = await ory.createBrowserRecoveryFlow({
-            returnTo: isInvite ? "/set-password?invite=true" : undefined,
+            returnTo: "/settings",
           })
           data = res.data
         }
 
         data.ui.nodes.forEach((node) => {
-          const attrs = node.attributes as { name?: string }
+          const attrs = node.attributes as { name?: string; value?: string; disabled?: boolean; type?: string; required?: boolean }
           if (attrs.name === "code") {
             node.meta.label = {
-              text: isInvite ? "Enter the code from your email" : "Enter your recovery code",
+              text: "Enter your recovery code",
               id: 0,
               type: "info",
             }
+            attrs.required = false
           }
           if (attrs.name === "email") {
             node.meta.label = { text: "Your email address", id: 0, type: "info" }
+          }
+          if (attrs.type === "button" || (attrs.name === "method" && attrs.value === "link")) {
+            attrs.disabled = false
           }
         })
 
@@ -53,11 +56,11 @@ const Recovery: NextPage = () => {
     }
 
     fetchFlow()
-  }, [router.isReady, flowId, isInvite])
+  }, [router.isReady, flowId])
 
   const onSubmit = (values: UpdateRecoveryFlowBody) =>
     router
-      .push(`${router.pathname}?flow=${flow?.id}${isInvite ? "&invite=true" : ""}`, undefined, {
+      .push(`${router.pathname}?flow=${flow?.id}`, undefined, {
         shallow: true,
       })
       .then(() =>
@@ -68,9 +71,6 @@ const Recovery: NextPage = () => {
           })
           .then(({ data }) => {
             setFlow(data)
-            if (data.state === "passed_challenge") {
-              router.push(isInvite ? "/set-password?invite=true" : "/")
-            }
           })
           .catch(handleFlowError(router, "recovery", setFlow))
           .catch((err: any) => {
@@ -87,27 +87,26 @@ const Recovery: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{isInvite ? "Accept Invitation" : "Recover Account"}</title>
+        <title>Recovery</title>
       </Head>
 
       <div className="app-container">
         <KernLogo />
-
-        <div id="verification">
+        <div id="recovery">
           <h2 className="title">
-            {isInvite ? "Accept Your Invitation" : "Recover your account"}
+            Recover your account
           </h2>
 
           <Flow onSubmit={onSubmit} flow={flow} />
 
-          {!isInvite && (
-            <div className="link-container">
-              <a className="link" href="/auth/login">
-                Go back to login
-              </a>
-            </div>
-          )}
+          <div className="link-container">
+            <a className="link" href="/auth/login">
+              Go back to login
+            </a>
+          </div>
         </div>
+      </div>
+      <div className="img-container">
       </div>
     </>
   )
