@@ -75,6 +75,8 @@ const InvitePage: NextPage = () => {
           <Flow onSubmit={onSubmit} flow={flow} />
         </div>
       </div>
+      <div className="img-container">
+      </div>
     </>
   )
 }
