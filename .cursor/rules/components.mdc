@@ -328,10 +328,9 @@ import { combineClassNames } from "@/submodules/javascript-functions/general";
 ```typescript
 // pages/settings.tsx
 <button 
-  className="link disabled:opacity-50 disabled:cursor-not-allowed" 
-  data-testid="forgot-password" 
-  disabled={backButtonDisabled} 
-  onClick={() => router.push("/cognition")}
+ className="link disabled:opacity-50 disabled:cursor-not-allowed" 
+ disabled={backButtonDisabled} 
+ onClick={() => router.push("/cognition")}
 >
   {t('back')}
 </button>

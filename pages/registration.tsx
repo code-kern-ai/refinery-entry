@@ -117,7 +117,7 @@ const Registration: NextPage = () => {
           </div>
 
           <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
+            <a className="link" href="/auth/login">Go back to login</a>
           </div>
         </div>
       </div>
