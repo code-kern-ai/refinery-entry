@@ -16,7 +16,11 @@ const Verification: NextPage = () => {
   const [flow, setFlow] = useState<VerificationFlow | null>(null)
 
   useEffect(() => {
-    if (!router.isReady || !flowId) return
+    if (!router.isReady) return
+    if (!flowId) {
+      router.replace("/error")
+      return
+    }
     ory
       .getVerificationFlow({ id: String(flowId) })
       .then(({ data }) => {

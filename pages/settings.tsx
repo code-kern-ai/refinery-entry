@@ -329,7 +329,7 @@ const Settings: NextPage = () => {
           </div>) : (<> </>)}
 
           <div className="link-container">
-            <button className="link disabled:opacity-50 disabled:cursor-not-allowed" data-testid="forgot-password" disabled={backButtonDisabled} onClick={() => {
+            <button className="link disabled:opacity-50 disabled:cursor-not-allowed" disabled={backButtonDisabled} onClick={() => {
               router.push("/cognition")
             }}>{t('back')}</button>
           </div>

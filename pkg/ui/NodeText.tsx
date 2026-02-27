@@ -17,28 +17,21 @@ const Content = ({ node, attributes }: Props) => {
       // This text node contains lookup secrets. Let's make them a bit more beautiful!
       const secrets = (attributes.text.context as any).secrets.map(
         (text: UiText, k: number) => (
-          <div
-            key={k}
-            data-testid={`node/text/${attributes.id}/lookup_secret`}
-            className="col-xs-3"
-          >
+          <div key={k} className="col-xs-3">
             {/* Used lookup_secret has ID 1050014 */}
             <code>{text.id === 1050014 ? "Used" : text.text}</code>
           </div>
         ),
       )
       return (
-        <div
-          className="container-fluid"
-          data-testid={`node/text/${attributes.id}/text`}
-        >
+        <div className="container-fluid">
           <div className="row">{secrets}</div>
         </div>
       )
   }
 
   return (
-    <div data-testid={`node/text/${attributes.id}/text`}>
+    <div>
       <ScrollableCodeBox code={attributes.text.text} />
     </div>
   )
@@ -47,7 +40,7 @@ const Content = ({ node, attributes }: Props) => {
 export const NodeText = ({ node, attributes }: Props) => {
   return (
     <>
-      <P data-testid={`node/text/${attributes.id}/label`}>
+      <P>
         {node.meta?.label?.text}
       </P>
       <Content node={node} attributes={attributes} />

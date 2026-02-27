@@ -34,8 +34,9 @@ const InvitePage: NextPage = () => {
       .catch((err) => handleFlowError(router, "recovery", setFlow)(err))
   }, [router.isReady, flowId])
 
-  const onSubmit = (values: UpdateRecoveryFlowBody) =>
-    router
+  const onSubmit = (values: UpdateRecoveryFlowBody) => {
+    if (!flow?.id) return
+    return router
       .push(`/invite?flow=${flow?.id}`, undefined, { shallow: true })
       .then(() =>
         ory
@@ -45,9 +46,6 @@ const InvitePage: NextPage = () => {
           })
           .then(({ data }) => {
             setFlow(data)
-            if (data.state === "passed_challenge") {
-              router.push("/set-password?invite=true")
-            }
           })
           .catch(handleFlowError(router, "recovery", setFlow))
           .catch((err: any) => {
@@ -58,6 +56,7 @@ const InvitePage: NextPage = () => {
             throw err
           })
       )
+  }
 
   if (!flow) return null
 
