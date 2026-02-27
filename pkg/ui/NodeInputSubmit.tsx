@@ -37,6 +37,7 @@ export function NodeInputSubmit<T>({
         name={attributes.name}
         value={attributes.value || ""}
         disabled={attributes.disabled || disabled}
+        formNoValidate={node.group === "link" || /resend/i.test(getNodeLabel(node))}
       >
         {buttonName}
       </Button>

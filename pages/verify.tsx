@@ -1,128 +1,93 @@
 import { VerificationFlow, UpdateVerificationFlowBody } from "@ory/client"
-import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 import { Flow } from "../pkg"
+import { handleFlowError } from "../pkg/errors"
 import ory from "../pkg/sdk"
 import { KernLogo } from "@/pkg/ui/Icons"
 
 const Verification: NextPage = () => {
-  const [initialFlow, setInitialFlow] = useState<VerificationFlow>()
-  const [changedFlow, setChangedFlow] = useState<VerificationFlow>()
-
-  // Get ?flow=... from the URL
   const router = useRouter()
-  const { flow: flowId, return_to: returnTo } = router.query
+  const { flow: flowId, state: flowState } = router.query
+
+  const [flow, setFlow] = useState<VerificationFlow | null>(null)
 
   useEffect(() => {
-    // If the router is not ready yet, or we already have a flow, do nothing.
-    if (!router.isReady || initialFlow) {
+    if (!router.isReady) return
+    if (!flowId) {
+      router.replace("/error")
       return
     }
-
-    // If ?flow=.. was in the URL, we fetch it
-    if (flowId) {
-      ory
-        .getVerificationFlow({ id: String(flowId) })
-        .then(({ data }) => {
-          setInitialFlow(data)
-        })
-        .catch((err: AxiosError) => {
-          switch (err.response?.status) {
-            case 410:
-            // Status code 410 means the request has expired - so let's load a fresh flow!
-            case 403:
-              // Status code 403 implies some other issue (e.g. CSRF) - let's reload!
-              return router.push("/verify")
+    ory
+      .getVerificationFlow({ id: String(flowId) })
+      .then(({ data }) => {
+        if (flowState === "success") {
+          const returnTo = (data as VerificationFlow & { return_to?: string }).return_to
+          window.location.href = returnTo || "/cognition"
+          return
+        }
+        data.ui.nodes.forEach((node) => {
+          const attrs = node.attributes as { name?: string; value?: string }
+          if (attrs.name === "code") {
+            node.meta.label = { text: "Enter the code from your email", id: 0, type: "info" }
+            attrs.value = ""
           }
-
-          throw err
         })
-      return
-    }
-
-    // Otherwise we initialize it
-    ory
-      .createBrowserVerificationFlow({
-        returnTo: returnTo ? String(returnTo) : undefined,
+        setFlow(data)
       })
-      .then(({ data }) => {
-        setInitialFlow(data)
+      .catch((err) => handleFlowError(router, "verification", setFlow)(err))
+  }, [router.isReady, flowId, flowState])
+
+  const onSubmit = (values: UpdateVerificationFlowBody) =>
+    router
+      .push(`${router.pathname}?flow=${flow?.id}`, undefined, {
+        shallow: true,
       })
-      .catch((err: AxiosError) => {
-        switch (err.response?.status) {
-          case 400:
-            // Status code 400 implies the user is already signed in
-            return router.push("/")
-        }
+      .then(() =>
+        ory
+          .updateVerificationFlow({
+            flow: String(flow?.id),
+            updateVerificationFlowBody: values,
+          })
+          .then(({ data }) => {
+            const returnTo = (data as VerificationFlow & { return_to?: string }).return_to
+            window.location.href = returnTo || "/cognition"
+          })
+          .catch((err: any) => {
+            if (err.response?.data?.error?.id === "browser_location_change_required") {
+              window.location.href = "/cognition"
+              return
+            }
+            return handleFlowError(router, "verification", setFlow)(err)
+          })
+          .catch((err: any) => {
+            if (err.response?.status === 400) {
+              setFlow(err.response?.data)
+              return
+            }
+            throw err
+          })
+      )
 
-        throw err
-      })
-  }, [flowId, router, router.isReady, returnTo, initialFlow])
-
-  useEffect(() => {
-    if (!initialFlow) return
-    initialFlow.ui.nodes[1].meta.label = { text: "Email address", id: 0, type: "info" }
-    setChangedFlow(initialFlow)
-  }, [initialFlow])
-
-  const onSubmit = async (values: UpdateVerificationFlowBody) => {
-    await router
-      // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-      // their data when they reload the page.
-      .push(`/verify?flow=${initialFlow?.id}`, undefined, { shallow: true })
-
-    ory
-      .updateVerificationFlow({
-        flow: String(initialFlow?.id),
-        updateVerificationFlowBody: values,
-      })
-      .then(({ data }) => {
-        // Form submission was successful, show the message to the user!
-        setInitialFlow(data)
-      })
-      .catch((err: AxiosError) => {
-        switch (err.response?.status) {
-          case 400:
-            // Status code 400 implies the form validation had an error
-            setInitialFlow(err.response?.data as VerificationFlow | undefined)
-            return
-          case 410:
-            const newFlowID = (err.response.data as any).use_flow_id
-            router
-              // On submission, add the flow ID to the URL but do not navigate. This prevents the user loosing
-              // their data when they reload the page.
-              .push(`/verify?flow=${newFlowID}`, undefined, {
-                shallow: true,
-              })
-
-            ory
-              .getVerificationFlow({ id: newFlowID })
-              .then(({ data }) => setInitialFlow(data))
-            return
-        }
-
-        throw err
-      })
-  }
+  if (!flow) return null
 
   return (
     <>
       <Head>
-        <title>Verification</title>
-        <meta name="description" content="NextJS + React + Vercel + Ory" />
+        <title>Verify</title>
       </Head>
+
       <div className="app-container">
         <KernLogo />
         <div id="verification">
-          <h2 className="title">Verify your account</h2>
-          <Flow onSubmit={onSubmit} flow={changedFlow} />
-          <div className="link-container">
-            <a className="link" data-testid="forgot-password" href="/auth/login">Go back to login</a>
-          </div>
+          <h2 className="title">
+            Verify your account
+          </h2>
+
+          <Flow onSubmit={onSubmit} flow={flow} />
         </div>
       </div>
       <div className="img-container">

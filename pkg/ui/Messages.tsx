@@ -13,7 +13,7 @@ export const Message = ({ message }: MessageProps) => {
 
   return (
     <Alert severity={message.type === "error" ? "error" : "info"}>
-      <AlertContent data-testid={`ui/message/${message.id}`} className={message.type == 'error' ? 'message error' : 'message success'}>
+      <AlertContent className={message.type == 'error' ? 'message error' : 'message success'}>
         {displayMessage(message, language)}
       </AlertContent>
     </Alert>

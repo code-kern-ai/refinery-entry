@@ -183,7 +183,7 @@ const Login: NextPage = () => {
         <div id="login">
           <h2 className="title">Sign in to your account</h2>
           <p className="text-paragraph">Or
-            <a className="link" data-testid="cta-link" href={registrationHref}> Register account </a> -
+            <a className="link" href={registrationHref}> Register account </a> -
             no credit card required!
           </p>
           <div className="ui-container">
@@ -210,9 +210,9 @@ const Login: NextPage = () => {
             {
               !isAccLinkageRequested ?
                 <>
-                  {displayMailForm ? <a className="link" data-testid="forgot-password" href="/auth/recovery">Forgot your password?</a> : null}
+                  {displayMailForm ? <a className="link" href="/auth/recovery">Forgot your password?</a> : null}
                 </>
-                : <a className="link" data-testid="back-to-login" href={backToLoginHref}>Go back to login</a>
+                : <a className="link" href={backToLoginHref}>Go back to login</a>
             }
           </div>
         </div>
