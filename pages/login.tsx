@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Flow } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
@@ -54,8 +54,12 @@ const Login: NextPage = () => {
             }),
           })
         })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to accept login")
+          return res.json()
+        })
         .then(({ redirect_to }) => {
+          if (!redirect_to || typeof redirect_to !== "string") return
           const target = new URL(redirect_to, window.location.origin)
           if (target.pathname === window.location.pathname && target.search === window.location.search) {
             window.location.reload()
@@ -160,16 +164,24 @@ const Login: NextPage = () => {
       })
 
 
-  const backToLoginQuery = new URLSearchParams({
-    ...(returnTo ? { return_to: String(returnTo) } : {}),
-    ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
-  }).toString()
+  const backToLoginQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        ...(returnTo ? { return_to: String(returnTo) } : {}),
+        ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+      }).toString(),
+    [returnTo, loginChallenge],
+  )
   const backToLoginHref = `/auth/login${backToLoginQuery ? `?${backToLoginQuery}` : ""}`
 
-  const registrationQuery = new URLSearchParams({
-    ...(returnTo ? { return_to: String(returnTo) } : {}),
-    ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
-  }).toString()
+  const registrationQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        ...(returnTo ? { return_to: String(returnTo) } : {}),
+        ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+      }).toString(),
+    [returnTo, loginChallenge],
+  )
   const registrationHref = `/auth/registration${registrationQuery ? `?${registrationQuery}` : ""}`
 
   return (

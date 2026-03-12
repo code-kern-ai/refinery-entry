@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { KernLogo } from "@/pkg/ui/Icons"
 import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
@@ -102,10 +102,14 @@ const Registration: NextPage = () => {
       })
   }
 
-  const backToLoginQuery = new URLSearchParams({
-    ...(returnTo ? { return_to: String(returnTo) } : {}),
-    ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
-  }).toString()
+  const backToLoginQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        ...(returnTo ? { return_to: String(returnTo) } : {}),
+        ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+      }).toString(),
+    [returnTo, loginChallenge],
+  )
   const backToLoginHref = `/auth/login${backToLoginQuery ? `?${backToLoginQuery}` : ""}`
 
 

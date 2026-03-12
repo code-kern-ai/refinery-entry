@@ -16,6 +16,11 @@ const SCOPE_META: Record<string, { label: string; description: string }> = {
   offline_access: { label: "Offline access", description: "Stay signed in on your behalf" },
 }
 
+const LOADING_CONTAINER_STYLE = { textAlign: "center" as const }
+const FORM_SCOPE_CONTAINER_STYLE = { marginTop: 20 }
+const SUBTITLE_STYLE = { marginBottom: 4 }
+const TEXT_DESCRIPTION_BOTTOM_STYLE = { marginBottom: 0 }
+
 function getScopeMeta(scope: string) {
   return SCOPE_META[scope] ?? { label: scope, description: "Access to " + scope }
 }
@@ -99,16 +104,21 @@ const Consent: NextPage = () => {
               session,
             }),
           })
-            .then(res => res.json())
-            .then(({ redirect_to }) => { window.location.href = redirect_to })
+            .then(res => {
+              if (!res.ok) throw new Error('Failed to accept consent')
+              return res.json()
+            })
+            .then(({ redirect_to }) => {
+              if (redirect_to && typeof redirect_to === "string") window.location.href = redirect_to
+            })
         }
 
         setConsentRequest(data)
         setSelectedScopes(requestedScope)
         setIsLoading(false)
       })
-      .catch(err => {
-        setErrorMessage(err.message ?? "Unable to load the consent request.")
+      .catch((err: unknown) => {
+        setErrorMessage(err instanceof Error ? err.message : "Unable to load the consent request.")
         setIsLoading(false)
       })
   }, [router.isReady, challenge, buildSession, remember])
@@ -137,14 +147,19 @@ const Consent: NextPage = () => {
           session,
         }),
       })
+      if (!res.ok) throw new Error('Failed to accept consent')
       const { redirect_to } = await res.json()
-      window.location.href = redirect_to
-    } catch (err: any) {
-      setErrorMessage(err.message ?? "Unable to accept consent.")
+      if (redirect_to && typeof redirect_to === "string") window.location.href = redirect_to
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Unable to accept consent.")
     } finally {
       setIsSubmitting(false)
     }
   }, [buildSession, challenge, consentRequest, isSubmitting, remember, selectedScopes])
+
+  const handleRememberChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setRemember(e.target.checked)
+  }, [])
 
   const handleReject = useCallback(async () => {
     if (!challenge || isSubmitting) return
@@ -156,10 +171,11 @@ const Consent: NextPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ challenge }),
       })
+      if (!res.ok) throw new Error('Failed to reject consent')
       const { redirect_to } = await res.json()
-      window.location.href = redirect_to
-    } catch (err: any) {
-      setErrorMessage(err.message ?? "Unable to reject consent.")
+      if (redirect_to && typeof redirect_to === "string") window.location.href = redirect_to
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Unable to reject consent.")
     } finally {
       setIsSubmitting(false)
     }
@@ -194,7 +210,7 @@ const Consent: NextPage = () => {
           {errorMessage && <p className="message error">{errorMessage}</p>}
 
           {isLoading && challenge && !errorMessage && (
-            <div className="ui-container" style={{ textAlign: "center" }}>
+            <div className="ui-container" style={LOADING_CONTAINER_STYLE}>
               <p className="text-paragraph">Loading consent request…</p>
             </div>
           )}
@@ -225,9 +241,9 @@ const Consent: NextPage = () => {
               </div>
 
               {consentRequest.requested_scope && consentRequest.requested_scope.length > 0 && (
-                <div className="form-container" style={{ marginTop: 20 }}>
-                  <p className="subtitle" style={{ marginBottom: 4 }}>Permissions</p>
-                  <p className="text-description" style={{ marginBottom: 0 }}>
+                <div className="form-container" style={FORM_SCOPE_CONTAINER_STYLE}>
+                  <p className="subtitle" style={SUBTITLE_STYLE}>Permissions</p>
+                  <p className="text-description" style={TEXT_DESCRIPTION_BOTTOM_STYLE}>
                     Select which permissions to grant
                   </p>
                   <div className="scope-list">
@@ -259,7 +275,7 @@ const Consent: NextPage = () => {
                 <input
                   type="checkbox"
                   checked={remember}
-                  onChange={e => setRemember(e.target.checked)}
+                  onChange={handleRememberChange}
                 />
                 <span className="remember-text">Remember this decision</span>
               </label>
