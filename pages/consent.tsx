@@ -253,7 +253,7 @@ const Consent: NextPage = () => {
                       return (
                         <label
                           key={scope}
-                          className={`scope-item${isChecked ? " selected" : ""}`}
+                          className={combineClassNames("scope-item", isChecked && "selected")}
                         >
                           <input
                             type="checkbox"
