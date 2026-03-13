@@ -3,7 +3,7 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { KernLogo } from "@/pkg/ui/Icons"
 import ory from "@/pkg/sdk"
 import { handleFlowError } from "@/pkg/errors"
@@ -22,7 +22,11 @@ const Registration: NextPage = () => {
 
 
   // Get ?flow=... from the URL
-  const { flow: flowId, return_to: returnTo } = router.query;
+  const {
+    flow: flowId,
+    return_to: returnTo,
+    login_challenge: loginChallenge,
+  } = router.query;
 
   // In this effect we either initiate a new registration flow, or we fetch an existing registration flow.
   useEffect(() => {
@@ -47,12 +51,13 @@ const Registration: NextPage = () => {
     ory
       .createBrowserRegistrationFlow({
         returnTo: returnTo ? String(returnTo) : undefined,
+        loginChallenge: loginChallenge ? String(loginChallenge) : undefined,
       })
       .then(({ data }) => {
         setInitialFlow(data)
       })
       .catch(handleFlowError(router, "registration", setInitialFlow))
-  }, [flowId, router, router.isReady, returnTo, initialFlow])
+  }, [flowId, router, router.isReady, returnTo, loginChallenge, initialFlow])
 
   useEffect(() => {
     if (!initialFlow) return;
@@ -97,6 +102,17 @@ const Registration: NextPage = () => {
       })
   }
 
+  const backToLoginQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        ...(returnTo ? { return_to: String(returnTo) } : {}),
+        ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+      }).toString(),
+    [returnTo, loginChallenge],
+  )
+  const backToLoginHref = `/auth/login${backToLoginQuery ? `?${backToLoginQuery}` : ""}`
+
+
   return (
     <>
       <Head>
@@ -117,7 +133,7 @@ const Registration: NextPage = () => {
           </div>
 
           <div className="link-container">
-            <a className="link" href="/auth/login">Go back to login</a>
+            <a className="link" href={backToLoginHref}>Go back to login</a>
           </div>
         </div>
       </div>

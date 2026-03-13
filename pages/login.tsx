@@ -3,14 +3,12 @@ import { AxiosError } from "axios"
 import type { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Flow } from "../pkg"
 import { handleGetFlowError, handleFlowError } from "../pkg/errors"
 import { KernLogo } from "@/pkg/ui/Icons"
 
-import { DemoFlow } from "@/pkg/ui/DemoFlow"
-import { getValueIdentifier, getValuePassword } from "@/util/helper-functions"
 import ory from "@/pkg/sdk"
 
 const Login: NextPage = () => {
@@ -26,6 +24,7 @@ const Login: NextPage = () => {
   const {
     return_to: returnTo,
     flow: flowId,
+    login_challenge: loginChallenge,
     // Refresh means we want to refresh the session. This is needed, for example, when we want to update the password
     // of a user.
     refresh,
@@ -37,6 +36,48 @@ const Login: NextPage = () => {
   useEffect(() => {
     // If the router is not ready yet, or we already have a flow, do nothing.
     if (!router.isReady || initialFlow) {
+      return
+    }
+    // If there is a challenge, check for existing session first
+    if (loginChallenge) {
+
+      ory.toSession()
+        .then(({ data }) => {
+          // Active session exists — let the server accept the challenge
+          // without forcing re-auth
+          return fetch(`/refinery-authorizer/hydra/login/accept`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              challenge: String(loginChallenge),
+              subject: data.identity.id,
+            }),
+          })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to accept login")
+          return res.json()
+        })
+        .then(({ redirect_to }) => {
+          if (!redirect_to || typeof redirect_to !== "string") return
+          const target = new URL(redirect_to, window.location.origin)
+          if (target.pathname === window.location.pathname && target.search === window.location.search) {
+            window.location.reload()
+          } else {
+            window.location.href = redirect_to
+          }
+        })
+        .catch(() => {
+          // No session — proceed with normal flow creation
+          ory.createBrowserLoginFlow({
+            refresh: Boolean(refresh),
+            aal: aal ? String(aal) : undefined,
+            returnTo: returnTo ? String(returnTo) : undefined,
+            loginChallenge: String(loginChallenge),
+          })
+          .then(({ data }) => setInitialFlow(data))
+          .catch(handleFlowError(router, 'login', setInitialFlow))
+        })
       return
     }
     // If ?flow=.. was in the URL, we fetch it
@@ -55,12 +96,13 @@ const Login: NextPage = () => {
         refresh: Boolean(refresh),
         aal: aal ? String(aal) : undefined,
         returnTo: returnTo ? String(returnTo) : undefined,
+        loginChallenge: loginChallenge ? String(loginChallenge) : undefined,
       })
       .then(({ data }) => {
         setInitialFlow(data)
       })
       .catch(handleFlowError(router, "login", setInitialFlow))
-  }, [flowId, router, router.isReady, aal, refresh, returnTo, initialFlow])
+  }, [flowId, router, router.isReady, aal, refresh, returnTo, loginChallenge, initialFlow])
 
   useEffect(() => {
     if (!initialFlow) return;
@@ -121,6 +163,27 @@ const Login: NextPage = () => {
         return Promise.reject(err)
       })
 
+
+  const backToLoginQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        ...(returnTo ? { return_to: String(returnTo) } : {}),
+        ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+      }).toString(),
+    [returnTo, loginChallenge],
+  )
+  const backToLoginHref = `/auth/login${backToLoginQuery ? `?${backToLoginQuery}` : ""}`
+
+  const registrationQuery = useMemo(
+    () =>
+      new URLSearchParams({
+        ...(returnTo ? { return_to: String(returnTo) } : {}),
+        ...(loginChallenge ? { login_challenge: String(loginChallenge) } : {}),
+      }).toString(),
+    [returnTo, loginChallenge],
+  )
+  const registrationHref = `/auth/registration${registrationQuery ? `?${registrationQuery}` : ""}`
+
   return (
     <>
       <Head>
@@ -132,7 +195,7 @@ const Login: NextPage = () => {
         <div id="login">
           <h2 className="title">Sign in to your account</h2>
           <p className="text-paragraph">Or
-            <a className="link" href="/auth/registration"> Register account </a> -
+            <a className="link" href={registrationHref}> Register account </a> -
             no credit card required!
           </p>
           <div className="ui-container">
@@ -161,7 +224,7 @@ const Login: NextPage = () => {
                 <>
                   {displayMailForm ? <a className="link" href="/auth/recovery">Forgot your password?</a> : null}
                 </>
-                : <a className="link" href="/auth/login">Go back to login</a>
+                : <a className="link" href={backToLoginHref}>Go back to login</a>
             }
           </div>
         </div>
