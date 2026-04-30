@@ -18,5 +18,18 @@
     "save": "Save",
     "overview": {
         "remainingTime": "Remaining time before auto logout"
+    },
+    "hydraRevoke": {
+        "title": "Connected applications",
+        "description": "Apps you authorized with OAuth2. You can revoke access for each app; you may need to sign in again if you use it later.",
+        "loading": "Loading connected applications…",
+        "empty": "You have no connected applications.",
+        "loadError": "Could not load connected applications.",
+        "noScopes": "No permissions (scopes) recorded for this connection.",
+        "revoke": "Revoke access",
+        "revoking": "Revoking…",
+        "revokeSuccess": "Access for “{{name}}” has been revoked.",
+        "revokeError": "Could not revoke access. Please try again.",
+        "retry": "Retry"
     }
 }
