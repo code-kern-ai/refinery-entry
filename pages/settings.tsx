@@ -17,10 +17,8 @@ import {
     getUserInfoExtended,
     revokeHydraOAuth2GrantsForClient,
 } from "@/util/data-fetch"
-import type { HydraConnectedApplication } from "@/util/hydra-connected-applications.helper"
-import SettingsConnectedApplications, {
-    type ConnectedApplicationsLoadState,
-} from "@/pages/SettingsConnectedApplications"
+import { HydraConnectedApplication } from "@/util/hydra-connected-applications.helper"
+import SettingsConnectedApplications, { ConnectedApplicationsLoadStateEnum } from "@/pages/SettingsConnectedApplications"
 import { useWebsocket } from "@/submodules/react-components/hooks/web-socket/useWebsocket"
 import { Application, CurrentPage } from "@/submodules/react-components/hooks/web-socket/constants"
 import { AdminMessage } from "@/submodules/react-components/types/admin-messages"
@@ -50,7 +48,7 @@ const Settings: NextPage = () => {
   const [loadPage, setLoadPage] = useState<boolean>(false);
   const [canShow, setCanShow] = useState<boolean>(false);
   const [connectedApps, setConnectedApps] = useState<HydraConnectedApplication[]>([]);
-  const [connectedAppsLoadState, setConnectedAppsLoadState] = useState<ConnectedApplicationsLoadState>("idle");
+  const [connectedAppsLoadState, setConnectedAppsLoadState] = useState<ConnectedApplicationsLoadStateEnum>(ConnectedApplicationsLoadStateEnum.IDLE);
   const [connectedAppsLoadError, setConnectedAppsLoadError] = useState("");
   const [revokingClientId, setRevokingClientId] = useState<string | null>(null);
   const [revokeNotice, setRevokeNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -231,18 +229,15 @@ const Settings: NextPage = () => {
   }, [changedFlow, isOidc, isOidcInvitation, showPassword, flowId, isOidc])
 
   const loadConnectedApplications = useCallback(
-    async (opts?: { silent?: boolean }) => {
-      const silent = opts?.silent === true;
-      if (!silent) {
-        setConnectedAppsLoadState("loading");
-        setConnectedAppsLoadError("");
-      }
+    async () => {
+      setConnectedAppsLoadState(ConnectedApplicationsLoadStateEnum.LOADING);
+      setConnectedAppsLoadError("");
       try {
         const list = await fetchHydraConnectedApplicationsForCurrentUser();
         setConnectedApps(list);
-        setConnectedAppsLoadState("success");
+        setConnectedAppsLoadState(ConnectedApplicationsLoadStateEnum.SUCCESS);
       } catch (e) {
-        setConnectedAppsLoadState("error");
+        setConnectedAppsLoadState(ConnectedApplicationsLoadStateEnum.ERROR);
         setConnectedAppsLoadError(
           e instanceof Error && e.message ? e.message : t("hydraRevoke.loadError"),
         );
@@ -263,7 +258,7 @@ const Settings: NextPage = () => {
       try {
         await revokeHydraOAuth2GrantsForClient(clientId);
         setRevokeNotice({ type: "success", message: t("hydraRevoke.revokeSuccess", { name: clientName }) });
-        await loadConnectedApplications({ silent: true });
+        await loadConnectedApplications();
       } catch (e) {
         setRevokeNotice({
           type: "error",
@@ -350,7 +345,7 @@ const Settings: NextPage = () => {
           </>}
 
           {showAuthenticator && <>
-            {containsBackupCodes ? (<div className="form-container">
+            {containsBackupCodes ? <div className="form-container">
               <h3 className="subtitle">{t('backUpCodes')}</h3>
               <p>{t('backUpCodesDescription')}</p>
               <Flow
@@ -359,9 +354,9 @@ const Settings: NextPage = () => {
                 only="lookup_secret"
                 flow={changedFlow}
               />
-            </div>) : (<> </>)}
+            </div> : <> </>}
 
-            {containsTotp ? (<div className="form-container">
+            {containsTotp ? <div className="form-container">
               <h3 className="subtitle">{t('totpAuthenticator')}</h3>
               <p>{t('addTotpAuthenticator')}
                 {t('popularAuthenticatorApps')} <a href="https://www.lastpass.com" target="_blank">LastPass</a>{t('and')} Google
@@ -376,19 +371,19 @@ const Settings: NextPage = () => {
                 only="totp"
                 flow={changedFlow}
               />
-            </div>) : (<> </>)}
+            </div> : <> </>}
           </>}
 
-          {(isOidc && isOidcInvitation) ? (<div className="form-container">
+          {(isOidc && isOidcInvitation) ? <div className="form-container">
             <Flow
               hideGlobalMessages
               onSubmit={onSubmit}
               only="oidc"
               flow={changedFlow}
             />
-          </div>) : (<> </>)}
+          </div> : <> </>}
 
-          {canShow && (
+          {canShow && 
             <SettingsConnectedApplications
               applications={connectedApps}
               loadState={connectedAppsLoadState}
@@ -396,9 +391,9 @@ const Settings: NextPage = () => {
               revokingClientId={revokingClientId}
               revokeNotice={revokeNotice}
               onRevoke={handleRevokeOAuth2ForClient}
-              onRetryLoad={() => void loadConnectedApplications()}
+              onRetryLoad={loadConnectedApplications}
             />
-          )}
+          }
 
           <div className="link-container">
             <button className="link disabled:opacity-50 disabled:cursor-not-allowed" disabled={backButtonDisabled} onClick={() => {

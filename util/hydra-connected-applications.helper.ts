@@ -1,4 +1,4 @@
-import type { OAuth2ConsentSession } from "@ory/client";
+import { OAuth2ConsentSession } from "@ory/client";
 
 export interface HydraConnectedApplication {
     readonly clientId: string;
@@ -38,11 +38,6 @@ function fromConsentSession(session: OAuth2ConsentSession): HydraConnectedApplic
     };
 }
 
-/**
- * Maps Hydra `OAuth2ConsentSession[]` (from `OAuth2Api.listOAuth2ConsentSessions`)
- * to the UI shape, merging multiple sessions for the same `client_id` (scopes union,
- * first non-empty `client_name` / `logo_uri` kept).
- */
 export function consentSessionsToConnectedApplications(
     sessions: OAuth2ConsentSession[],
 ): HydraConnectedApplication[] {

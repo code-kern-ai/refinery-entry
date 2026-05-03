@@ -4,14 +4,19 @@ import { useTranslation } from "react-i18next"
 import { combineClassNames } from "@/submodules/javascript-functions/general"
 import {
     oauth2ScopeLabel,
-    type HydraConnectedApplication,
+    HydraConnectedApplication,
 } from "@/util/hydra-connected-applications.helper"
 
-export type ConnectedApplicationsLoadState = "idle" | "loading" | "success" | "error"
+export enum ConnectedApplicationsLoadStateEnum {
+    IDLE = "idle",
+    LOADING = "loading",
+    SUCCESS = "success",
+    ERROR = "error"
+}
 
 export interface SettingsConnectedApplicationsProps {
     readonly applications: HydraConnectedApplication[];
-    readonly loadState: ConnectedApplicationsLoadState;
+    readonly loadState: ConnectedApplicationsLoadStateEnum;
     readonly loadError: string;
     readonly revokingClientId: string | null;
     readonly revokeNotice: { type: "success" | "error"; message: string } | null;
@@ -97,7 +102,7 @@ function SettingsConnectedApplications(props: SettingsConnectedApplicationsProps
         onRetryLoad()
     }, [onRetryLoad])
 
-    const showLoading = loadState === "idle" || loadState === "loading"
+    const showLoading = loadState === ConnectedApplicationsLoadStateEnum.IDLE || loadState === ConnectedApplicationsLoadStateEnum.LOADING
 
     return (
         <div className="form-container">
