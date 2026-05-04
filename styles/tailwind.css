@@ -336,7 +336,6 @@ button.button-sign-in:focus {
     padding: 10px 14px;
     border: 1px solid #E5E7EB;
     border-radius: 8px;
-    cursor: pointer;
     transition: all 0.15s ease-in-out;
     background-color: white;
 }
@@ -355,7 +354,6 @@ button.button-sign-in:focus {
     width: 16px;
     height: 16px;
     accent-color: #5AB370;
-    cursor: pointer;
     flex-shrink: 0;
 }
 
@@ -369,6 +367,66 @@ button.button-sign-in:focus {
     font-size: 12px;
     color: #6B7280;
     margin-top: 1px;
+}
+
+.settings-connected-apps-list {
+    max-height: 320px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    padding-right: 6px;
+}
+
+.settings-connected-app-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 12px;
+    background-color: #FFFFFF;
+}
+
+.settings-connected-app-badge {
+    margin-bottom: 0 !important;
+    width: 100%;
+}
+
+.settings-connected-app-scopes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.settings-connected-app-scopes-empty {
+    font-size: 12px;
+    color: #6B7280;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.settings-scope-chip {
+    font-size: 12px;
+    line-height: 16px;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: #F3F4F6;
+    color: #374151;
+}
+
+.settings-connected-app-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.settings-connected-apps-muted {
+    margin-top: 12px;
+    color: #6B7280;
+}
+
+.settings-connected-apps-error-block {
+    margin-top: 12px;
 }
 
 .remember-row {

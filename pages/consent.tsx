@@ -250,15 +250,18 @@ const Consent: NextPage = () => {
                     {consentRequest.requested_scope.map(scope => {
                       const meta = getScopeMeta(scope)
                       const isChecked = selectedScopes.includes(scope)
+                      const isDisabled = scope.toLowerCase().includes('offline') || scope.toLowerCase().includes('openid')
                       return (
                         <label
                           key={scope}
-                          className={combineClassNames("scope-item", isChecked && "selected")}
+                          className={combineClassNames("scope-item", isChecked && "selected", isDisabled ? "cursor-not-allowed" : "cursor-pointer")}
                         >
                           <input
                             type="checkbox"
+                            className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                             checked={isChecked}
                             onChange={e => handleScopeChange(scope, e.target.checked)}
+                            disabled={isDisabled}
                           />
                           <div>
                             <div className="scope-label">{meta.label}</div>

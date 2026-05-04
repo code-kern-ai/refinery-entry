@@ -18,5 +18,18 @@
     "save": "Speichern",
     "overview": {
         "remainingTime": "Verbleibende Zeit vor der automatischen Abmeldung"
+    },
+    "hydraRevoke": {
+        "title": "Verbundene Anwendungen",
+        "description": "Apps, die Sie per OAuth2 autorisiert haben. Sie können den Zugriff pro App widerrufen; eine erneute Anmeldung kann nötig sein.",
+        "loading": "Verbundene Anwendungen werden geladen…",
+        "empty": "Sie haben keine verbundenen Anwendungen.",
+        "loadError": "Verbundene Anwendungen konnten nicht geladen werden.",
+        "noScopes": "Für diese Verbindung sind keine Berechtigungen (Scopes) hinterlegt.",
+        "revoke": "Zugriff widerrufen",
+        "revoking": "Wird widerrufen…",
+        "revokeSuccess": "Der Zugriff für „{{name}}“ wurde widerrufen.",
+        "revokeError": "Der Zugriff konnte nicht widerrufen werden. Bitte versuchen Sie es erneut.",
+        "retry": "Erneut versuchen"
     }
 }

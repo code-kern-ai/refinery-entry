@@ -4,8 +4,7 @@ const nextConfig = {
   swcMinify: true,
   env: {
     IS_DEV: process.env.IS_DEV,
-  }
-}
+  },
+};
 
-
-module.exports = nextConfig
+module.exports = nextConfig;

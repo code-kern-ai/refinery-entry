@@ -18,5 +18,18 @@
     "save": "Redden",
     "overview": {
         "remainingTime": "Verbleibende tijd voor automatische afmelding"
+    },
+    "hydraRevoke": {
+        "title": "Gekoppelde applicaties",
+        "description": "Apps die u met OAuth2 hebt gemachtigd. U kunt de toegang per app intrekken; u moet zich mogelijk later opnieuw aanmelden.",
+        "loading": "Gekoppelde applicaties laden…",
+        "empty": "U hebt geen gekoppelde applicaties.",
+        "loadError": "Gekoppelde applicaties konden niet worden geladen.",
+        "noScopes": "Geen rechten (scopes) vastgelegd voor deze verbinding.",
+        "revoke": "Toegang intrekken",
+        "revoking": "Bezig met intrekken…",
+        "revokeSuccess": "Toegang voor „{{name}}“ is ingetrokken.",
+        "revokeError": "Toegang kon niet worden ingetrokken. Probeer het opnieuw.",
+        "retry": "Opnieuw proberen"
     }
 }
