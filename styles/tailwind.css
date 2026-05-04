@@ -336,7 +336,6 @@ button.button-sign-in:focus {
     padding: 10px 14px;
     border: 1px solid #E5E7EB;
     border-radius: 8px;
-    /* cursor: pointer; */
     transition: all 0.15s ease-in-out;
     background-color: white;
 }
@@ -355,7 +354,6 @@ button.button-sign-in:focus {
     width: 16px;
     height: 16px;
     accent-color: #5AB370;
-    /* cursor: pointer; */
     flex-shrink: 0;
 }
 
