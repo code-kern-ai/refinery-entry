@@ -13,13 +13,20 @@ steps:
       - 'git config --global url."https://github.com/".insteadOf git@github.com:'
       - "git submodule update --recursive"
   - name: build and publish
-    image: plugins/docker
+    image: plugins/docker:21.2.8-linux-amd64
+    depends_on:
+      - submodules
     settings:
       registry: registry.dev.kern.ai
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
+      base_image_registry: dhi.io
+      base_image_username:
+        from_secret: dockerhub_username
+      base_image_password:
+        from_secret: dockerhub_password
       repo: "registry.dev.kern.ai/${DRONE_REPO}"
       tags: ["${DRONE_COMMIT_SHA}", "${DRONE_COMMIT_BRANCH}"]
       cache_from:
@@ -41,6 +48,7 @@ platform:
 steps:
   - name: trigger update
     image: appleboy/drone-ssh
+    failure: ignore
     settings:
       host: app.dev.kern.ai
       username:
@@ -75,13 +83,20 @@ steps:
       - 'git config --global url."https://github.com/".insteadOf git@github.com:'
       - "git submodule update --recursive"
   - name: build and publish
-    image: plugins/docker
+    image: plugins/docker:21.2.8-linux-amd64
+    depends_on:
+      - submodules
     settings:
       registry: registry.dev.kern.ai
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
+      base_image_registry: dhi.io
+      base_image_username:
+        from_secret: dockerhub_username
+      base_image_password:
+        from_secret: dockerhub_password
       repo: "registry.dev.kern.ai/${DRONE_REPO}"
       tags: ["${DRONE_COMMIT_SHA}_arm64", "${DRONE_COMMIT_BRANCH}_arm64"]
       cache_from:
@@ -110,11 +125,18 @@ steps:
       - 'git config --global url."https://github.com/".insteadOf git@github.com:'
       - "git submodule update --recursive"
   - name: build and publish
-    image: plugins/docker
+    image: plugins/docker:21.2.8-linux-amd64
+    depends_on:
+      - submodules
     settings:
       username:
         from_secret: dockerhub_username
       password:
+        from_secret: dockerhub_password
+      base_image_registry: dhi.io
+      base_image_username:
+        from_secret: dockerhub_username
+      base_image_password:
         from_secret: dockerhub_password
       repo: "kernai/${DRONE_REPO_NAME}"
       tag: "${DRONE_TAG}-drone-amd64"
@@ -139,11 +161,18 @@ steps:
       - 'git config --global url."https://github.com/".insteadOf git@github.com:'
       - "git submodule update --recursive"
   - name: build and publish
-    image: plugins/docker
+    image: plugins/docker:21.2.8-linux-amd64
+    depends_on:
+      - submodules
     settings:
       username:
         from_secret: dockerhub_username
       password:
+        from_secret: dockerhub_password
+      base_image_registry: dhi.io
+      base_image_username:
+        from_secret: dockerhub_username
+      base_image_password:
         from_secret: dockerhub_password
       repo: "kernai/${DRONE_REPO_NAME}"
       tag: "${DRONE_TAG}-drone-arm64"

@@ -11,7 +11,7 @@ import { KernLogo } from "@/pkg/ui/Icons"
 
 const Recovery: NextPage = () => {
   const router = useRouter()
-  const { flow: flowId, return_to: returnTo } = router.query
+  const { flow: flowId } = router.query
 
   const [flow, setFlow] = useState<RecoveryFlow>()
 
@@ -26,7 +26,8 @@ const Recovery: NextPage = () => {
           data = res.data
         } else {
           const res = await ory.createBrowserRecoveryFlow({
-            returnTo: returnTo ? String(returnTo) : undefined,
+            // Omit returnTo - Kratos uses default_browser_return_url. Passing custom return_to
+            // causes "return url not allowed" if not in allowed_return_urls.
           })
           data = res.data
         }
@@ -56,7 +57,7 @@ const Recovery: NextPage = () => {
     }
 
     fetchFlow()
-  }, [router.isReady, flowId, returnTo])
+  }, [router.isReady, flowId])
 
   const onSubmit = (values: UpdateRecoveryFlowBody) =>
     router
