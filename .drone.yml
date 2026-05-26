@@ -48,7 +48,6 @@ platform:
 steps:
   - name: trigger update
     image: appleboy/drone-ssh
-    failure: ignore
     settings:
       host: app.dev.kern.ai
       username:

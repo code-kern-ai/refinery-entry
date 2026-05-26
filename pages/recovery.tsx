@@ -26,7 +26,7 @@ const Recovery: NextPage = () => {
           data = res.data
         } else {
           const res = await ory.createBrowserRecoveryFlow({
-            returnTo: returnTo ? String(returnTo) : undefined
+            returnTo: returnTo ? String(returnTo) : undefined,
           })
           data = res.data
         }
