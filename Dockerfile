@@ -1,5 +1,5 @@
+ARG PARENT_IMAGE=registry.dev.kern.ai/code-kern-ai/refinery-parent-images:hardened-images-next
 ARG DHI_NODE_BUILD=dhi.io/node:20-debian12-dev
-ARG DHI_NODE_RUNTIME=dhi.io/node:20-debian12
 
 FROM ${DHI_NODE_BUILD} AS builder
 
@@ -23,7 +23,7 @@ COPY tailwind.config.js .
 
 RUN npm run build
 
-FROM ${DHI_NODE_RUNTIME}
+FROM ${PARENT_IMAGE}
 
 WORKDIR /app
 
@@ -31,6 +31,6 @@ COPY --from=builder --chown=65532:65532 /app/.next/standalone ./
 COPY --from=builder --chown=65532:65532 /app/public ./public
 COPY --from=builder --chown=65532:65532 /app/.next/static ./.next/static
 
-USER 65532:65532
+USER nonroot
 
 ENTRYPOINT ["node", "server.js"]

@@ -1,5 +1,6 @@
-ARG DHI_NODE_BUILD=dhi.io/node:20-debian12-dev
-FROM ${DHI_NODE_BUILD}
+ARG PARENT_IMAGE=dhi.io/node:20-debian12-dev
+
+FROM ${PARENT_IMAGE}
 
 WORKDIR /app
 
