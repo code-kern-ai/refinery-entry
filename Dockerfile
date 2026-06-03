@@ -6,7 +6,6 @@ FROM ${DHI_NODE_BUILD} AS builder
 WORKDIR /app
 
 COPY package*.json ./
-ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm install && npm cache clean --force
 
