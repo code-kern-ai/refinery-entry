@@ -1,11 +1,12 @@
-ARG PARENT_IMAGE=registry.dev.kern.ai/code-kern-ai/refinery-parent-images:hardened-images-next
 ARG DHI_NODE_BUILD=dhi.io/node:20-debian12-dev
+ARG DHI_NODE_RUNTIME=dhi.io/node:20-debian12
 
 FROM ${DHI_NODE_BUILD} AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
+ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm install && npm cache clean --force
 
@@ -23,13 +24,19 @@ COPY tailwind.config.js .
 
 RUN npm run build
 
-FROM ${PARENT_IMAGE}
+# Standalone bundles its own traced node_modules (Next 12). Do not use
+# hardened-images-next here: that parent pre-installs Next 15 and leaves
+# extra modules under /app/node_modules, which breaks header handling at runtime.
+FROM ${DHI_NODE_RUNTIME}
 
 WORKDIR /app
 
-COPY --from=builder --chown=65532:65532 /app/.next/standalone ./
-COPY --from=builder --chown=65532:65532 /app/public ./public
-COPY --from=builder --chown=65532:65532 /app/.next/static ./.next/static
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=builder --chown=1000:1000 /app/.next/standalone ./
+COPY --from=builder --chown=1000:1000 /app/public ./public
+COPY --from=builder --chown=1000:1000 /app/.next/static ./.next/static
 
 USER node
 
