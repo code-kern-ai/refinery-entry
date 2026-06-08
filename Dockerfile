@@ -1,7 +1,7 @@
 ARG PARENT_IMAGE=kernai/refinery-parent-images:v2.0.0-next
-ARG DHI_NODE_RUNTIME=dhi.io/node:20-debian12
+ARG DHI_NODE_BUILD=dhi.io/node:20-debian12-dev
 
-FROM ${PARENT_IMAGE} AS builder
+FROM ${DHI_NODE_BUILD} AS builder
 
 WORKDIR /app
 
@@ -23,15 +23,11 @@ COPY tailwind.config.js .
 
 RUN npm run build
 
-# Standalone bundles its own traced node_modules (Next 12). Do not use
-# hardened-images-next here: that parent pre-installs Next 15 and leaves
-# extra modules under /app/node_modules, which breaks header handling at runtime.
-FROM ${DHI_NODE_RUNTIME}
+FROM ${PARENT_IMAGE}
 
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=builder --chown=1000:1000 /app/.next/standalone ./
 COPY --from=builder --chown=1000:1000 /app/public ./public
