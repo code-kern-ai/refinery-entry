@@ -1,7 +1,7 @@
-ARG DHI_NODE_BUILD=dhi.io/node:20-debian12-dev
+ARG PARENT_IMAGE=kernai/refinery-parent-images:v2.0.0-next
 ARG DHI_NODE_RUNTIME=dhi.io/node:20-debian12
 
-FROM ${DHI_NODE_BUILD} AS builder
+FROM ${PARENT_IMAGE} AS builder
 
 WORKDIR /app
 
