@@ -1,5 +1,5 @@
-ARG PARENT_IMAGE=kernai/refinery-parent-images:v2.0.0-next
 ARG DHI_NODE_BUILD=dhi.io/node:20-debian12-dev
+ARG DHI_NODE_RUNTIME=dhi.io/node:20-debian12
 
 FROM ${DHI_NODE_BUILD} AS builder
 
@@ -23,11 +23,12 @@ COPY tailwind.config.js .
 
 RUN npm run build
 
-FROM ${PARENT_IMAGE}
+FROM ${DHI_NODE_RUNTIME}
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=builder --chown=1000:1000 /app/.next/standalone ./
 COPY --from=builder --chown=1000:1000 /app/public ./public
