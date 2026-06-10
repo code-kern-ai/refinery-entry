@@ -1,8 +1,12 @@
-FROM node:18-alpine
+ARG PARENT_IMAGE=dhi.io/node:20-debian12-dev
+
+FROM ${PARENT_IMAGE}
 
 WORKDIR /app
 
 VOLUME ["/app"]
+
+USER root
 
 COPY package*.json /app/
 
