@@ -1,4 +1,4 @@
-ARG PARENT_IMAGE=dhi.io/node:20-debian12-dev
+ARG PARENT_IMAGE=node:20-alpine
 
 FROM ${PARENT_IMAGE}
 
