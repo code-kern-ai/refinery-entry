@@ -27,14 +27,19 @@
     "express": "^4.18.2",
     "i18next": "^25.3.2",
     "next": "15.5.28",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-i18next": "^14.1.2",
     "react-toastify": "^9.1.2",
     "rxjs": "^7.8.1",
     "styled-components": "^5.3.9",
     "tinycolor2": "^1.6.0",
     "typescript": "5.0.4"
+  },
+  "overrides": {
+    "@ory/themes": {
+      "styled-components": "$styled-components"
+    }
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
