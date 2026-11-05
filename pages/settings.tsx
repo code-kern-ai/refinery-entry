@@ -154,7 +154,7 @@ const Settings: NextPage = () => {
 
     //prevent password change option display if sso
     setTimeout(() => {
-      if (["microsoft", "google"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
+      if (["microsoft"].includes(initialFlow.identity.metadata_public?.registration_scope?.provider_id)) {
         initialFlow.ui.nodes = initialFlow.ui.nodes.filter((node: UiNode) => node.group !== "password");
         setIsOidc(true);
         setCanShow(true);
@@ -162,11 +162,6 @@ const Settings: NextPage = () => {
           setIsOidcInvitation(true);
         }
         const provider = initialFlow.identity.metadata_public?.registration_scope?.provider_id;
-        if (provider === "google") {
-          document.querySelector('button[value="Microsoft"]')?.setAttribute("class", "hidden");
-        } else if (provider === "microsoft") {
-          document.querySelector('button[value="Google"]')?.setAttribute("class", "hidden");
-        }
       }
       else {
         setIsOidc(false);
